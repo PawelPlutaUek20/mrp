@@ -2,7 +2,7 @@
   "name": "mrp",
   "homepage": "https://viktoriia-kravchuk.github.io/mrp",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "dependencies": {
     "@mantine/core": "^4.0.1",
     "@mantine/hooks": "^4.0.1",
