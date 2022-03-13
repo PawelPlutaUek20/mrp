@@ -69,11 +69,15 @@ const App = () => {
         navbarOffsetBreakpoint="sm"
         padding={0}
         fixed
-        styles={{
-          body: {
+        styles={(theme) => ({
+          main: {
+            backgroundColor:
+              theme.colorScheme === "dark"
+                ? theme.colors.dark[8]
+                : theme.colors.gray[0],
             height: `100vh`,
           },
-        }}
+        })}
         navbar={
           <Navbar
             p="md"
