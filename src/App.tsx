@@ -67,8 +67,13 @@ const App = () => {
     >
       <AppShell
         navbarOffsetBreakpoint="sm"
-        padding="md"
+        padding={0}
         fixed
+        styles={{
+          body: {
+            height: `100%`,
+          },
+        }}
         navbar={
           <Navbar
             p="md"
@@ -98,18 +103,10 @@ const App = () => {
             </div>
           </Header>
         }
-        styles={{
-          main: {
-            paddingRight: 0,
-          },
-          body: {
-            height: `calc(100% - 60px)`,
-          },
-        }}
       >
-        <ScrollArea style={{ height: "100%", paddingRight: 16 }}>
+        <ScrollArea p="md" style={{ height: "100%" }}>
           <Title order={1}>GHP</Title>
-          <Table sx={{ marginTop: 16, marginBottom: 16 }}>
+          <Table my="md">
             <thead>
               <tr>
                 <th>tydzień:</th>
@@ -121,7 +118,7 @@ const App = () => {
             <tbody>{rows}</tbody>
           </Table>
           <Title order={1}>MRP</Title>
-          <Table sx={{ marginTop: 16, marginBottom: 16 }}>
+          <Table mt="md">
             <thead>
               <tr>
                 <th>Dane produkcyjne: Okres</th>
