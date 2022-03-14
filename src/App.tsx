@@ -1,5 +1,14 @@
 import React from "react";
 import {
+  library,
+  IconLookup,
+  IconDefinition,
+  findIconDefinition,
+} from "@fortawesome/fontawesome-svg-core";
+import { fas } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
+import {
   AppShell,
   Header,
   MantineProvider,
@@ -13,6 +22,8 @@ import {
   Burger,
   useMantineTheme,
 } from "@mantine/core";
+
+library.add(fas);
 
 const elements = [
   { name: "Przewidywany popyt" },
@@ -30,6 +41,12 @@ const elements2 = [
   "Planowane przyjęcie zamówień",
   "Czas realizacji = Wielkość partii = Poziom BOM = Na stanie = ",
 ];
+
+const tableLookup: IconLookup = { prefix: "fas", iconName: "chart-column" };
+const tableIconDefinition: IconDefinition = findIconDefinition(tableLookup);
+
+const bedLookup: IconLookup = { prefix: "fas", iconName: "bed" };
+const bedIconDefinition: IconDefinition = findIconDefinition(bedLookup);
 
 const App = () => {
   const [opened, setOpened] = React.useState(false);
@@ -85,7 +102,17 @@ const App = () => {
             hidden={!opened}
             width={{ sm: 300, lg: 400 }}
           >
-            <Text>Application navbar</Text>
+            <Navbar.Section>
+              {" "}
+              <Text>
+                <FontAwesomeIcon icon={tableIconDefinition} size="lg" /> Main
+                Page
+              </Text>
+            </Navbar.Section>
+            <Navbar.Section grow mt="md">
+              {/* Links sections */}
+            </Navbar.Section>
+            <Navbar.Section>{/* Footer with user */}</Navbar.Section>
           </Navbar>
         }
         header={
@@ -103,7 +130,11 @@ const App = () => {
                 />
               </MediaQuery>
 
-              <Text>Application header</Text>
+              <Text>
+                {" "}
+                <FontAwesomeIcon icon={bedIconDefinition} size="lg" /> Algorytm
+                MRP dla produkcji łóżek{" "}
+              </Text>
             </div>
           </Header>
         }
