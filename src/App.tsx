@@ -14,6 +14,8 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 
+import { MyTable } from "./Table/Table"
+
 const elements = [
   { name: "Przewidywany popyt" },
   { name: "Produkcja" },
@@ -22,42 +24,18 @@ const elements = [
 ];
 
 const elements2 = [
-  "Całkowite zapotrzebowanie",
-  "Planowane przyjęcia",
-  "Przewidywane na stanie",
-  "Zapotrzebowanie netto",
-  "Planowane zamówienia",
-  "Planowane przyjęcie zamówień",
-  "Czas realizacji = Wielkość partii = Poziom BOM = Na stanie = ",
+  { name: "Całkowite zapotrzebowanie" },
+  { name: "Planowane przyjęcia" },
+  { name: "Przewidywane na stanie" },
+  { name: "Zapotrzebowanie netto" },
+  { name: "Planowane zamówienia" },
+  { name: "Planowane przyjęcie zamówień" },
+  { name: "Czas realizacji = Wielkość partii = Poziom BOM = Na stanie = " }
 ];
 
 const App = () => {
   const [opened, setOpened] = React.useState(false);
   const theme = useMantineTheme();
-
-  const rows = elements.map((element, index) => (
-    <tr key={index}>
-      <td>{element.name}</td>
-      {index !== 3 &&
-        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(() => (
-          <td>
-            <NumberInput hideControls />
-          </td>
-        ))}
-    </tr>
-  ));
-
-  const rows2 = elements2.map((element, index) => (
-    <tr key={index}>
-      <td>{element}</td>
-      {index !== 6 &&
-        [1, 2, 3, 4, 5, 6].map(() => (
-          <td>
-            <NumberInput hideControls />
-          </td>
-        ))}
-    </tr>
-  ));
 
   return (
     <MantineProvider
@@ -110,29 +88,9 @@ const App = () => {
       >
         <ScrollArea p="md" style={{ height: "100%" }}>
           <Title order={1}>GHP</Title>
-          <Table my="md">
-            <thead>
-              <tr>
-                <th>tydzień:</th>
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((week) => (
-                  <th>{week}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>{rows}</tbody>
-          </Table>
+          <MyTable my="md" headers={[1,2,3,4,5,6,7,8,9,10]} headerTitle={"Tydzień:"} elements={elements}></MyTable>
           <Title order={1}>MRP</Title>
-          <Table mt="md">
-            <thead>
-              <tr>
-                <th>Dane produkcyjne: Okres</th>
-                {[1, 2, 3, 4, 5, 6].map((week) => (
-                  <th>{week}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>{rows2}</tbody>
-          </Table>
+          <MyTable my="md" headers={[1,2,3,4,5,6]} headerTitle={"Dane produkcyjne: Okres:"} elements={elements2}></MyTable>
         </ScrollArea>
       </AppShell>
     </MantineProvider>
