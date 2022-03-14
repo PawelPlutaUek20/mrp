@@ -13,6 +13,7 @@ import {
   Burger,
   useMantineTheme,
 } from "@mantine/core";
+import { NavbarContent } from "./NavbarContent";
 
 const elements = [
   { name: "Przewidywany popyt" },
@@ -85,7 +86,7 @@ const App = () => {
             hidden={!opened}
             width={{ sm: 300, lg: 400 }}
           >
-            <Text>Application navbar</Text>
+            <NavbarContent />
           </Navbar>
         }
         header={
@@ -103,7 +104,7 @@ const App = () => {
                 />
               </MediaQuery>
 
-              <Text>Application header</Text>
+              <Text>Algorytm MRP dla produkcji łóżek</Text>
             </div>
           </Header>
         }
