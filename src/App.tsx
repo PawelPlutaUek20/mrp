@@ -11,6 +11,7 @@ import {
   Burger,
   useMantineTheme,
   Table,
+  NumberInput,
 } from "@mantine/core";
 
 import { NavbarContent } from "./NavbarContent";
@@ -41,45 +42,49 @@ const App = () => {
   const [opened, setOpened] = React.useState(false);
   const theme = useMantineTheme();
 
-  const GHP = [
+  const [GHP, setGHP] = React.useState([
     [null, null, null, null, 20, null, 40, null, null, null],
     [null, null, null, null, 28, null, 30, null, null, null],
     [2, 2, 2, 2, 10, 10, 0, 0, 0, 0],
-  ];
+  ]);
 
   const naStanie = 22;
   const wielkoscPartii = 40;
 
-  const x = transpose(GHP).reduce((acc, val, index) => {
-    console.log(val[0] && val[1] && acc[index - 1][2] - val[1]);
-    return !val[0] && !val[1]
-      ? [
-          ...acc,
-          [
-            null,
-            null,
-            acc[index - 1] ? acc[index - 1][2] : naStanie,
-            null,
-            null,
-            null,
-          ],
-        ]
-      : acc[index - 1][2] - val[1] < 0
-      ? [
-          ...acc,
-          [
-            val[1],
-            null,
-            wielkoscPartii - (val[1] - acc[index - 1][2]),
-            val[1] - acc[index - 1][2],
-            null,
-            wielkoscPartii,
-          ],
-        ]
-      : [...acc, [val[1], null, acc[index - 1][2] - val[1], null, null, null]];
-  }, []);
+  const getX = (ghp: any[][]): any[][] => {
+    return transpose(ghp).reduce((acc, val, index) => {
+      return !val[0] && !val[1]
+        ? [
+            ...acc,
+            [
+              null,
+              null,
+              acc[index - 1] ? acc[index - 1][2] : naStanie,
+              null,
+              null,
+              null,
+            ],
+          ]
+        : acc[index - 1][2] - val[1] < 0
+        ? [
+            ...acc,
+            [
+              val[1],
+              null,
+              wielkoscPartii - (val[1] - acc[index - 1][2]),
+              val[1] - acc[index - 1][2],
+              null,
+              wielkoscPartii,
+            ],
+          ]
+        : [
+            ...acc,
+            [val[1], null, acc[index - 1][2] - val[1], null, null, null],
+          ];
+    }, []);
+  };
 
-  console.log(JSON.stringify(x, null, "\t"));
+  const [x, setX] = React.useState<any[][]>(() => getX(GHP));
 
   return (
     <MantineProvider
@@ -134,11 +139,29 @@ const App = () => {
           <Title order={1}>GHP</Title>
           <Table my="md">
             <tbody>
-              {GHP.map((row, index) => (
-                <tr key={index}>
-                  {row.map((col) => (
-                    <td>{col}</td>
-                  ))}
+              {GHP.map((row, index1) => (
+                <tr key={index1}>
+                  {row.map((col, index2) =>
+                    index1 == 2 ? (
+                      <td>{col}</td>
+                    ) : (
+                      <td>
+                        <NumberInput
+                          value={col || undefined}
+                          hideControls
+                          onChange={(value: number) => {
+                            setGHP((ghp) => {
+                              const tempGHP = ghp;
+                              tempGHP[index1][index2] = value;
+
+                              setX(getX(ghp));
+                              return tempGHP;
+                            });
+                          }}
+                        />
+                      </td>
+                    )
+                  )}
                 </tr>
               ))}
             </tbody>
