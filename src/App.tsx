@@ -10,10 +10,15 @@ import {
   MediaQuery,
   Burger,
   useMantineTheme,
+  Table,
 } from "@mantine/core";
 
 import { NavbarContent } from "./NavbarContent";
 import { MyTable } from "./Table";
+
+function transpose(matrix: any[][]) {
+  return matrix[0].map((col, i) => matrix.map((row) => row[i]));
+}
 
 const elements = [
   { name: "Przewidywany popyt" },
@@ -35,6 +40,46 @@ const elements2 = [
 const App = () => {
   const [opened, setOpened] = React.useState(false);
   const theme = useMantineTheme();
+
+  const GHP = [
+    [null, null, null, null, 20, null, 40, null, null, null],
+    [null, null, null, null, 28, null, 30, null, null, null],
+    [2, 2, 2, 2, 10, 10, 0, 0, 0, 0],
+  ];
+
+  const naStanie = 22;
+  const wielkoscPartii = 40;
+
+  const x = transpose(GHP).reduce((acc, val, index) => {
+    console.log(val[0] && val[1] && acc[index - 1][2] - val[1]);
+    return !val[0] && !val[1]
+      ? [
+          ...acc,
+          [
+            null,
+            null,
+            acc[index - 1] ? acc[index - 1][2] : naStanie,
+            null,
+            null,
+            null,
+          ],
+        ]
+      : acc[index - 1][2] - val[1] < 0
+      ? [
+          ...acc,
+          [
+            val[1],
+            null,
+            wielkoscPartii - (val[1] - acc[index - 1][2]),
+            val[1] - acc[index - 1][2],
+            null,
+            wielkoscPartii,
+          ],
+        ]
+      : [...acc, [val[1], null, acc[index - 1][2] - val[1], null, null, null]];
+  }, []);
+
+  console.log(JSON.stringify(x, null, "\t"));
 
   return (
     <MantineProvider
@@ -87,17 +132,19 @@ const App = () => {
       >
         <ScrollArea p="md" style={{ height: "100%" }}>
           <Title order={1}>GHP</Title>
-          <MyTable
-            headers={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
-            headerTitle={"Tydzień:"}
-            elements={elements}
-          ></MyTable>
+          <Table my="md">
+            <tbody>
+              {GHP.map((row, index) => (
+                <tr key={index}>
+                  {row.map((col) => (
+                    <td>{col}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </Table>
           <Title order={1}>MRP</Title>
-          <MyTable
-            headers={[1, 2, 3, 4, 5, 6]}
-            headerTitle={"Dane produkcyjne: Okres:"}
-            elements={elements2}
-          ></MyTable>
+          <MyTable elements={transpose(x)}></MyTable>
         </ScrollArea>
       </AppShell>
     </MantineProvider>
