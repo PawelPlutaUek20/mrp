@@ -13,17 +13,22 @@ import {
   Header,
   MantineProvider,
   Navbar,
-  NumberInput,
   ScrollArea,
-  Table,
   Title,
   Text,
   MediaQuery,
   Burger,
   useMantineTheme,
+  Table,
+  NumberInput,
 } from "@mantine/core";
 
-library.add(fas);
+import { NavbarContent } from "./NavbarContent";
+import { MyTable } from "./Table";
+
+function transpose(matrix: any[][]) {
+  return matrix[0].map((col, i) => matrix.map((row) => row[i]));
+}
 
 const elements = [
   { name: "Przewidywany popyt" },
@@ -33,13 +38,13 @@ const elements = [
 ];
 
 const elements2 = [
-  "Całkowite zapotrzebowanie",
-  "Planowane przyjęcia",
-  "Przewidywane na stanie",
-  "Zapotrzebowanie netto",
-  "Planowane zamówienia",
-  "Planowane przyjęcie zamówień",
-  "Czas realizacji = Wielkość partii = Poziom BOM = Na stanie = ",
+  { name: "Całkowite zapotrzebowanie" },
+  { name: "Planowane przyjęcia" },
+  { name: "Przewidywane na stanie" },
+  { name: "Zapotrzebowanie netto" },
+  { name: "Planowane zamówienia" },
+  { name: "Planowane przyjęcie zamówień" },
+  { name: "Czas realizacji = Wielkość partii = Poziom BOM = Na stanie = " },
 ];
 
 const tableLookup: IconLookup = { prefix: "fas", iconName: "chart-column" };
@@ -52,29 +57,49 @@ const App = () => {
   const [opened, setOpened] = React.useState(false);
   const theme = useMantineTheme();
 
-  const rows = elements.map((element, index) => (
-    <tr key={index}>
-      <td>{element.name}</td>
-      {index !== 3 &&
-        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(() => (
-          <td>
-            <NumberInput hideControls />
-          </td>
-        ))}
-    </tr>
-  ));
+  const [GHP, setGHP] = React.useState([
+    [null, null, null, null, 20, null, 40, null, null, null],
+    [null, null, null, null, 28, null, 30, null, null, null],
+    [2, 2, 2, 2, 10, 10, 0, 0, 0, 0],
+  ]);
 
-  const rows2 = elements2.map((element, index) => (
-    <tr key={index}>
-      <td>{element}</td>
-      {index !== 6 &&
-        [1, 2, 3, 4, 5, 6].map(() => (
-          <td>
-            <NumberInput hideControls />
-          </td>
-        ))}
-    </tr>
-  ));
+  const naStanie = 22;
+  const wielkoscPartii = 40;
+
+  const getX = (ghp: any[][]): any[][] => {
+    return transpose(ghp).reduce((acc, val, index) => {
+      return !val[0] && !val[1]
+        ? [
+            ...acc,
+            [
+              null,
+              null,
+              acc[index - 1] ? acc[index - 1][2] : naStanie,
+              null,
+              null,
+              null,
+            ],
+          ]
+        : acc[index - 1][2] - val[1] < 0
+        ? [
+            ...acc,
+            [
+              val[1],
+              null,
+              wielkoscPartii - (val[1] - acc[index - 1][2]),
+              val[1] - acc[index - 1][2],
+              null,
+              wielkoscPartii,
+            ],
+          ]
+        : [
+            ...acc,
+            [val[1], null, acc[index - 1][2] - val[1], null, null, null],
+          ];
+    }, []);
+  };
+
+  const [x, setX] = React.useState<any[][]>(() => getX(GHP));
 
   return (
     <MantineProvider
@@ -102,17 +127,7 @@ const App = () => {
             hidden={!opened}
             width={{ sm: 300, lg: 400 }}
           >
-            <Navbar.Section>
-              {" "}
-              <Text>
-                <FontAwesomeIcon icon={tableIconDefinition} size="lg" /> Main
-                Page
-              </Text>
-            </Navbar.Section>
-            <Navbar.Section grow mt="md">
-              {/* Links sections */}
-            </Navbar.Section>
-            <Navbar.Section>{/* Footer with user */}</Navbar.Section>
+            <NavbarContent />
           </Navbar>
         }
         header={
@@ -130,11 +145,7 @@ const App = () => {
                 />
               </MediaQuery>
 
-              <Text>
-                {" "}
-                <FontAwesomeIcon icon={bedIconDefinition} size="lg" /> Algorytm
-                MRP dla produkcji łóżek{" "}
-              </Text>
+              <Text>Algorytm MRP dla produkcji łóżek</Text>
             </div>
           </Header>
         }
@@ -142,28 +153,36 @@ const App = () => {
         <ScrollArea p="md" style={{ height: "100%" }}>
           <Title order={1}>GHP</Title>
           <Table my="md">
-            <thead>
-              <tr>
-                <th>tydzień:</th>
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((week) => (
-                  <th>{week}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>{rows}</tbody>
+            <tbody>
+              {GHP.map((row, index1) => (
+                <tr key={index1}>
+                  {row.map((col, index2) =>
+                    index1 == 2 ? (
+                      <td>{col}</td>
+                    ) : (
+                      <td>
+                        <NumberInput
+                          value={col || undefined}
+                          hideControls
+                          onChange={(value: number) => {
+                            setGHP((ghp) => {
+                              const tempGHP = ghp;
+                              tempGHP[index1][index2] = value;
+
+                              setX(getX(ghp));
+                              return tempGHP;
+                            });
+                          }}
+                        />
+                      </td>
+                    )
+                  )}
+                </tr>
+              ))}
+            </tbody>
           </Table>
           <Title order={1}>MRP</Title>
-          <Table mt="md">
-            <thead>
-              <tr>
-                <th>Dane produkcyjne: Okres</th>
-                {[1, 2, 3, 4, 5, 6].map((week) => (
-                  <th>{week}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>{rows2}</tbody>
-          </Table>
+          <MyTable elements={transpose(x)}></MyTable>
         </ScrollArea>
       </AppShell>
     </MantineProvider>
