@@ -48,8 +48,18 @@ const App = () => {
     [2, 2, 2, 2, 10, 10, 0, 0, 0, 0],
   ]);
 
+  const [MRPPlanowanePrzyjecia, setMRPPlanowanePrzyjecia] = React.useState<
+    any[]
+  >([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+
+  const [MRPPlanowaneZamowienia, setMRPPlanowaneZamowienia] = React.useState<
+    any[]
+  >([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+
   const naStanie = 22;
   const wielkoscPartii = 40;
+
+  const [czasRealizacji, setCzasRealizacji] = React.useState<any>(2);
 
   const getX = (ghp: any[][]): any[][] => {
     return transpose(ghp).reduce((acc, val, index) => {
@@ -58,8 +68,10 @@ const App = () => {
             ...acc,
             [
               null,
-              null,
-              acc[index - 1] ? acc[index - 1][2] : naStanie,
+              MRPPlanowanePrzyjecia[index] || 0,
+              acc[index - 1]
+                ? acc[index - 1][2] + (MRPPlanowanePrzyjecia[index] || 0)
+                : naStanie + (MRPPlanowanePrzyjecia[index] || 0),
               null,
               null,
               null,
@@ -70,8 +82,10 @@ const App = () => {
             ...acc,
             [
               val[1],
-              null,
-              wielkoscPartii - (val[1] - acc[index - 1][2]),
+              MRPPlanowanePrzyjecia[index] || 0,
+              wielkoscPartii -
+                (val[1] - acc[index - 1][2]) +
+                (MRPPlanowanePrzyjecia[index] || 0),
               val[1] - acc[index - 1][2],
               null,
               wielkoscPartii,
@@ -79,7 +93,14 @@ const App = () => {
           ]
         : [
             ...acc,
-            [val[1], null, acc[index - 1][2] - val[1], null, null, null],
+            [
+              val[1],
+              MRPPlanowanePrzyjecia[index] || 0,
+              acc[index - 1][2] - val[1] + (MRPPlanowanePrzyjecia[index] || 0),
+              null,
+              null,
+              null,
+            ],
           ];
     }, []);
   };
@@ -142,7 +163,7 @@ const App = () => {
               {GHP.map((row, index1) => (
                 <tr key={index1}>
                   {row.map((col, index2) =>
-                    index1 == 2 ? (
+                    index1 === 2 ? (
                       <td>{col}</td>
                     ) : (
                       <td>
@@ -167,7 +188,48 @@ const App = () => {
             </tbody>
           </Table>
           <Title order={1}>MRP</Title>
-          <MyTable elements={transpose(x)}></MyTable>
+          <Table my="md">
+            <tbody>
+              {transpose(x).map((row, index1) => (
+                <tr key={index1}>
+                  {row.map((col, index2) =>
+                    index1 !== 1 && index1 !== 4 ? (
+                      <td style={{ height: 50.5, textAlign: "center" }}>
+                        {col}
+                      </td>
+                    ) : index1 === 1 ? (
+                      <td>
+                        <NumberInput
+                          value={MRPPlanowanePrzyjecia[index2] || undefined}
+                          hideControls
+                          onChange={(value: number) => {
+                            setMRPPlanowanePrzyjecia(
+                              (mrpPlanowanePrzyjecia) => {
+                                const tempGHP = mrpPlanowanePrzyjecia;
+                                tempGHP[index2] = value;
+
+                                setX(getX(GHP));
+                                return tempGHP;
+                              }
+                            );
+                          }}
+                        />
+                      </td>
+                    ) : (
+                      <td style={{ textAlign: "center", height: 50.5 }}>
+                        {MRPPlanowaneZamowienia[index2]}
+                      </td>
+                    )
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+          <NumberInput
+            label="Czas realizacji"
+            value={czasRealizacji}
+            onChange={(value) => setCzasRealizacji(value)}
+          />
         </ScrollArea>
       </AppShell>
     </MantineProvider>
