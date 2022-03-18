@@ -12,6 +12,7 @@ import {
   useMantineTheme,
   Table,
   NumberInput,
+  Space,
 } from "@mantine/core";
 
 import { NavbarContent } from "./NavbarContent";
@@ -52,17 +53,15 @@ const App = () => {
     any[]
   >([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
 
-  const [MRPPlanowaneZamowienia, setMRPPlanowaneZamowienia] = React.useState<
-    any[]
-  >([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
-
   const naStanie = 22;
   const wielkoscPartii = 40;
 
+  const [czasRealizacjiGHp, setCzasRealizacjiGHP] = React.useState(1)
+
   const [czasRealizacji, setCzasRealizacji] = React.useState<any>(2);
 
-  const getX = (ghp: any[][]): any[][] => {
-    return transpose(ghp).reduce((acc, val, index) => {
+  const getX = (ghp: any[][], czasRealizacji: number): any[][] => {
+    const res = transpose(ghp).reduce((acc, val, index) => {
       return !val[0] && !val[1]
         ? [
             ...acc,
@@ -103,9 +102,16 @@ const App = () => {
             ],
           ];
     }, []);
+
+    res.forEach((item, index) => {
+      if (item[5]) {
+        res[index - czasRealizacji][4] = item[5];
+      }
+    });
+    return res;
   };
 
-  const [x, setX] = React.useState<any[][]>(() => getX(GHP));
+  const [x, setX] = React.useState<any[][]>(() => getX(GHP, czasRealizacji));
 
   return (
     <MantineProvider
@@ -175,7 +181,7 @@ const App = () => {
                               const tempGHP = ghp;
                               tempGHP[index1][index2] = value;
 
-                              setX(getX(ghp));
+                              setX(getX(ghp, czasRealizacji));
                               return tempGHP;
                             });
                           }}
@@ -187,17 +193,25 @@ const App = () => {
               ))}
             </tbody>
           </Table>
+          <NumberInput
+            label="Czas realizacji"
+            value={czasRealizacjiGHp}
+            onChange={(value: number) => {
+              setCzasRealizacjiGHP(value);
+            }}
+          />
+          <Space h="xl" />
           <Title order={1}>MRP</Title>
           <Table my="md">
             <tbody>
-              {transpose(x).map((row, index1) => (
+              {transpose(x.slice(czasRealizacjiGHp)).map((row, index1) => (
                 <tr key={index1}>
                   {row.map((col, index2) =>
-                    index1 !== 1 && index1 !== 4 ? (
+                    index1 !== 1 ? (
                       <td style={{ height: 50.5, textAlign: "center" }}>
                         {col}
                       </td>
-                    ) : index1 === 1 ? (
+                    ) : (
                       <td>
                         <NumberInput
                           value={MRPPlanowanePrzyjecia[index2] || undefined}
@@ -208,16 +222,12 @@ const App = () => {
                                 const tempGHP = mrpPlanowanePrzyjecia;
                                 tempGHP[index2] = value;
 
-                                setX(getX(GHP));
+                                setX(getX(GHP, czasRealizacji));
                                 return tempGHP;
                               }
                             );
                           }}
                         />
-                      </td>
-                    ) : (
-                      <td style={{ textAlign: "center", height: 50.5 }}>
-                        {MRPPlanowaneZamowienia[index2]}
                       </td>
                     )
                   )}
@@ -228,7 +238,10 @@ const App = () => {
           <NumberInput
             label="Czas realizacji"
             value={czasRealizacji}
-            onChange={(value) => setCzasRealizacji(value)}
+            onChange={(value: number) => {
+              setX(getX(GHP, value));
+              setCzasRealizacji(value);
+            }}
           />
         </ScrollArea>
       </AppShell>
