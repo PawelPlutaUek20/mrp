@@ -56,7 +56,7 @@ const App = () => {
   const naStanie = 22;
   const wielkoscPartii = 40;
 
-  const [czasRealizacjiGHp, setCzasRealizacjiGHP] = React.useState(1)
+  const [czasRealizacjiGHp, setCzasRealizacjiGHP] = React.useState(1);
 
   const [czasRealizacji, setCzasRealizacji] = React.useState<any>(2);
 
@@ -117,7 +117,7 @@ const App = () => {
     <MantineProvider
       withGlobalStyles
       withNormalizeCSS
-      theme={{ colorScheme: "dark" }}
+      theme={{ colorScheme: "light" }}
     >
       <AppShell
         navbarOffsetBreakpoint="sm"
@@ -170,7 +170,9 @@ const App = () => {
                 <tr key={index1}>
                   {row.map((col, index2) =>
                     index1 === 2 ? (
-                      <td>{col}</td>
+                      <td style={{ height: 50.5, textAlign: "center" }}>
+                        {col}
+                      </td>
                     ) : (
                       <td>
                         <NumberInput
