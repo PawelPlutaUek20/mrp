@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   AppShell,
   Header,
@@ -19,7 +19,7 @@ import { NavbarContent } from "./NavbarContent";
 import { MyTable } from "./Table";
 
 function transpose(matrix: any[][]) {
-  return matrix[0].map((col, i) => matrix.map((row) => row[i]));
+  return matrix[0]?.map((col, i) => matrix.map((row) => row[i]));
 }
 
 const elements = [
@@ -43,22 +43,42 @@ const App = () => {
   const [opened, setOpened] = React.useState(false);
   const theme = useMantineTheme();
 
-  const [GHP, setGHP] = React.useState([
-    [null, null, null, null, 20, null, 40, null, null, null],
-    [null, null, null, null, 28, null, 30, null, null, null],
-    [2, 2, 2, 2, 10, 10, 0, 0, 0, 0],
-  ]);
-
   const [MRPPlanowanePrzyjecia, setMRPPlanowanePrzyjecia] = React.useState<
     any[]
   >([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
 
-  const naStanie = 22;
-  const wielkoscPartii = 40;
+  const [ghpVariables, setGhpVariables] = React.useState({
+    czasRealizacji: 1,
+    naStanie: 2,
+  });
 
-  const [czasRealizacjiGHp, setCzasRealizacjiGHP] = React.useState(1);
+  const [mrpVariables, setMrpVariables] = React.useState({
+    czasRealizacji: 2,
+    naStanie: 22,
+    poziomBOM: 1,
+    wielkoscPartii: 40,
+  });
 
-  const [czasRealizacji, setCzasRealizacji] = React.useState<any>(2);
+  const getY = (ghp: any[][]): any[][] => {
+    const a = transpose(ghp).reduce(
+      (acc, val, idx) =>
+        idx === 0
+          ? [
+              ...acc,
+              [
+                val[0],
+                val[1],
+                (val[1] || 0) - (val[0] || 0) + ghpVariables.naStanie,
+              ],
+            ]
+          : [
+              ...acc,
+              [val[0], val[1], (val[1] || 0) - (val[0] || 0) + acc[idx - 1][2]],
+            ],
+      []
+    );
+    return transpose(a);
+  };
 
   const getX = (ghp: any[][], czasRealizacji: number): any[][] => {
     const res = transpose(ghp).reduce((acc, val, index) => {
@@ -66,14 +86,14 @@ const App = () => {
         ? [
             ...acc,
             [
-              null,
+              undefined,
               MRPPlanowanePrzyjecia[index] || 0,
               acc[index - 1]
                 ? acc[index - 1][2] + (MRPPlanowanePrzyjecia[index] || 0)
-                : naStanie + (MRPPlanowanePrzyjecia[index] || 0),
-              null,
-              null,
-              null,
+                : mrpVariables.naStanie + (MRPPlanowanePrzyjecia[index] || 0),
+              undefined,
+              undefined,
+              undefined,
             ],
           ]
         : acc[index - 1][2] - val[1] < 0
@@ -82,12 +102,12 @@ const App = () => {
             [
               val[1],
               MRPPlanowanePrzyjecia[index] || 0,
-              wielkoscPartii -
+              mrpVariables.wielkoscPartii -
                 (val[1] - acc[index - 1][2]) +
                 (MRPPlanowanePrzyjecia[index] || 0),
               val[1] - acc[index - 1][2],
-              null,
-              wielkoscPartii,
+              undefined,
+              mrpVariables.wielkoscPartii,
             ],
           ]
         : [
@@ -96,22 +116,31 @@ const App = () => {
               val[1],
               MRPPlanowanePrzyjecia[index] || 0,
               acc[index - 1][2] - val[1] + (MRPPlanowanePrzyjecia[index] || 0),
-              null,
-              null,
-              null,
+              undefined,
+              undefined,
+              undefined,
             ],
           ];
     }, []);
 
     res.forEach((item, index) => {
-      if (item[5]) {
+      if (item[5] && index - czasRealizacji >= 0) {
         res[index - czasRealizacji][4] = item[5];
       }
     });
     return res;
   };
 
-  const [x, setX] = React.useState<any[][]>(() => getX(GHP, czasRealizacji));
+  const [GHP, setGHP] = React.useState(() =>
+    getY(Array.from(Array(3), () => new Array(10).fill(undefined)))
+  );
+
+  const [x, setX] = React.useState<any[][]>(() =>
+    getX(GHP, mrpVariables.czasRealizacji)
+  );
+
+  useEffect(() => setX(getX(GHP, mrpVariables.czasRealizacji)), [mrpVariables]);
+  useEffect(() => setGHP(getY(GHP)), [ghpVariables]);
 
   return (
     <MantineProvider
@@ -183,8 +212,8 @@ const App = () => {
                               const tempGHP = ghp;
                               tempGHP[index1][index2] = value;
 
-                              setX(getX(ghp, czasRealizacji));
-                              return tempGHP;
+                              setX(getX(ghp, mrpVariables.czasRealizacji));
+                              return getY(tempGHP);
                             });
                           }}
                         />
@@ -197,52 +226,81 @@ const App = () => {
           </Table>
           <NumberInput
             label="Czas realizacji"
-            value={czasRealizacjiGHp}
+            value={ghpVariables.czasRealizacji}
             onChange={(value: number) => {
-              setCzasRealizacjiGHP(value);
+              setGhpVariables((ghpVariables) => ({
+                ...ghpVariables,
+                czasRealizacji: value,
+              }));
+            }}
+          />
+          <NumberInput
+            label="Na stanie"
+            value={ghpVariables.naStanie}
+            onChange={(value: number) => {
+              setGhpVariables((ghpVariables) => ({
+                ...ghpVariables,
+                naStanie: value,
+              }));
             }}
           />
           <Space h="xl" />
           <Title order={1}>MRP</Title>
           <Table my="md">
             <tbody>
-              {transpose(x.slice(czasRealizacjiGHp)).map((row, index1) => (
-                <tr key={index1}>
-                  {row.map((col, index2) =>
-                    index1 !== 1 ? (
-                      <td style={{ height: 50.5, textAlign: "center" }}>
-                        {col}
-                      </td>
-                    ) : (
-                      <td>
-                        <NumberInput
-                          value={MRPPlanowanePrzyjecia[index2] || undefined}
-                          hideControls
-                          onChange={(value: number) => {
-                            setMRPPlanowanePrzyjecia(
-                              (mrpPlanowanePrzyjecia) => {
-                                const tempGHP = mrpPlanowanePrzyjecia;
-                                tempGHP[index2] = value;
+              {transpose(x.slice(ghpVariables.czasRealizacji))?.map(
+                (row, index1) => (
+                  <tr key={index1}>
+                    {row.map((col, index2) =>
+                      index1 !== 1 ? (
+                        <td style={{ height: 50.5, textAlign: "center" }}>
+                          {col}
+                        </td>
+                      ) : (
+                        <td>
+                          <NumberInput
+                            value={MRPPlanowanePrzyjecia[index2] || undefined}
+                            hideControls
+                            onChange={(value: number) => {
+                              setMRPPlanowanePrzyjecia(
+                                (mrpPlanowanePrzyjecia) => {
+                                  const tempGHP = mrpPlanowanePrzyjecia;
+                                  tempGHP[index2] = value;
 
-                                setX(getX(GHP, czasRealizacji));
-                                return tempGHP;
-                              }
-                            );
-                          }}
-                        />
-                      </td>
-                    )
-                  )}
-                </tr>
-              ))}
+                                  setX(getX(GHP, mrpVariables.czasRealizacji));
+                                  return tempGHP;
+                                }
+                              );
+                            }}
+                          />
+                        </td>
+                      )
+                    )}
+                  </tr>
+                )
+              )}
             </tbody>
           </Table>
           <NumberInput
             label="Czas realizacji"
-            value={czasRealizacji}
+            value={mrpVariables.czasRealizacji}
             onChange={(value: number) => {
               setX(getX(GHP, value));
-              setCzasRealizacji(value);
+              setMrpVariables((mrpVariables) => ({
+                ...mrpVariables,
+                czasRealizacji: value,
+              }));
+            }}
+          />
+          <NumberInput
+            label="Na stanie"
+            value={mrpVariables.naStanie}
+            onChange={(value: number) => {
+              setMrpVariables((mrpVariables) => ({
+                ...mrpVariables,
+                naStanie: value,
+              }));
+              setX(getX(GHP, value));
             }}
           />
         </ScrollArea>
