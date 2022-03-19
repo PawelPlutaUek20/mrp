@@ -3,46 +3,19 @@ import {
   AppShell,
   Header,
   MantineProvider,
-  Navbar,
   ScrollArea,
   Title,
   Text,
-  MediaQuery,
-  Burger,
-  useMantineTheme,
   Table,
   NumberInput,
   Space,
 } from "@mantine/core";
 
-import { NavbarContent } from "./NavbarContent";
-import { MyTable } from "./Table";
-
 function transpose(matrix: any[][]) {
   return matrix[0]?.map((col, i) => matrix.map((row) => row[i]));
 }
 
-const elements = [
-  { name: "Przewidywany popyt" },
-  { name: "Produkcja" },
-  { name: "Dostępne" },
-  { name: "Czas realizacji = Na stanie = " },
-];
-
-const elements2 = [
-  { name: "Całkowite zapotrzebowanie" },
-  { name: "Planowane przyjęcia" },
-  { name: "Przewidywane na stanie" },
-  { name: "Zapotrzebowanie netto" },
-  { name: "Planowane zamówienia" },
-  { name: "Planowane przyjęcie zamówień" },
-  { name: "Czas realizacji = Wielkość partii = Poziom BOM = Na stanie = " },
-];
-
 const App = () => {
-  const [opened, setOpened] = React.useState(false);
-  const theme = useMantineTheme();
-
   const [MRPPlanowanePrzyjecia, setMRPPlanowanePrzyjecia] = React.useState<
     any[]
   >([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
@@ -66,14 +39,18 @@ const App = () => {
           ? [
               ...acc,
               [
-                val[0],
-                val[1],
+                val[0] || 0,
+                val[1] || 0,
                 (val[1] || 0) - (val[0] || 0) + ghpVariables.naStanie,
               ],
             ]
           : [
               ...acc,
-              [val[0], val[1], (val[1] || 0) - (val[0] || 0) + acc[idx - 1][2]],
+              [
+                val[0] || 0,
+                val[1] || 0,
+                (val[1] || 0) - (val[0] || 0) + (acc[idx - 1][2] || 0),
+              ],
             ],
       []
     );
@@ -89,7 +66,7 @@ const App = () => {
               undefined,
               MRPPlanowanePrzyjecia[index] || 0,
               acc[index - 1]
-                ? acc[index - 1][2] + (MRPPlanowanePrzyjecia[index] || 0)
+                ? (acc[index - 1][2] || 0) + (MRPPlanowanePrzyjecia[index] || 0)
                 : mrpVariables.naStanie + (MRPPlanowanePrzyjecia[index] || 0),
               undefined,
               undefined,
@@ -100,12 +77,12 @@ const App = () => {
         ? [
             ...acc,
             [
-              val[1],
+              val[1] || 0,
               MRPPlanowanePrzyjecia[index] || 0,
               mrpVariables.wielkoscPartii -
-                (val[1] - acc[index - 1][2]) +
+                ((val[1] || 0) - (acc[index - 1][2] || 0)) +
                 (MRPPlanowanePrzyjecia[index] || 0),
-              val[1] - acc[index - 1][2],
+              (val[1] || 0) - (acc[index - 1][2] || 0),
               undefined,
               mrpVariables.wielkoscPartii,
             ],
@@ -113,9 +90,11 @@ const App = () => {
         : [
             ...acc,
             [
-              val[1],
+              val[1] || 0,
               MRPPlanowanePrzyjecia[index] || 0,
-              acc[index - 1][2] - val[1] + (MRPPlanowanePrzyjecia[index] || 0),
+              (acc[index - 1][2] || 0) -
+                (val[1] || 0) +
+                (MRPPlanowanePrzyjecia[index] || 0),
               undefined,
               undefined,
               undefined,
@@ -131,9 +110,14 @@ const App = () => {
     return res;
   };
 
-  const [GHP, setGHP] = React.useState(() =>
-    getY(Array.from(Array(3), () => new Array(10).fill(undefined)))
-  );
+  const [GHP, setGHP] = React.useState(() => {
+    const emptyArr = Array.from(Array(3), () => new Array(10).fill(undefined));
+    emptyArr[0][4] = 20;
+    emptyArr[0][6] = 40;
+    emptyArr[1][4] = 28;
+    emptyArr[1][6] = 30;
+    return getY(emptyArr);
+  });
 
   const [x, setX] = React.useState<any[][]>(() =>
     getX(GHP, mrpVariables.czasRealizacji)
@@ -149,7 +133,6 @@ const App = () => {
       theme={{ colorScheme: "light" }}
     >
       <AppShell
-        navbarOffsetBreakpoint="sm"
         padding={0}
         fixed
         styles={(theme) => ({
@@ -161,31 +144,11 @@ const App = () => {
             height: `100vh`,
           },
         })}
-        navbar={
-          <Navbar
-            p="md"
-            hiddenBreakpoint="sm"
-            hidden={!opened}
-            width={{ sm: 300, lg: 400 }}
-          >
-            <NavbarContent />
-          </Navbar>
-        }
         header={
           <Header height={70} p="md">
             <div
               style={{ display: "flex", alignItems: "center", height: "100%" }}
             >
-              <MediaQuery largerThan="sm" styles={{ display: "none" }}>
-                <Burger
-                  opened={opened}
-                  onClick={() => setOpened((o) => !o)}
-                  size="sm"
-                  color={theme.colors.gray[6]}
-                  mr="xl"
-                />
-              </MediaQuery>
-
               <Text>Algorytm MRP dla produkcji łóżek</Text>
             </div>
           </Header>
@@ -207,6 +170,7 @@ const App = () => {
                         <NumberInput
                           value={col || undefined}
                           hideControls
+                          disabled={index2 === 0}
                           onChange={(value: number) => {
                             setGHP((ghp) => {
                               const tempGHP = ghp;
@@ -285,7 +249,6 @@ const App = () => {
             label="Czas realizacji"
             value={mrpVariables.czasRealizacji}
             onChange={(value: number) => {
-              setX(getX(GHP, value));
               setMrpVariables((mrpVariables) => ({
                 ...mrpVariables,
                 czasRealizacji: value,
@@ -300,7 +263,16 @@ const App = () => {
                 ...mrpVariables,
                 naStanie: value,
               }));
-              setX(getX(GHP, value));
+            }}
+          />
+          <NumberInput
+            label="Wielkosc Partii"
+            value={mrpVariables.wielkoscPartii}
+            onChange={(value: number) => {
+              setMrpVariables((mrpVariables) => ({
+                ...mrpVariables,
+                wielkoscPartii: value,
+              }));
             }}
           />
         </ScrollArea>
