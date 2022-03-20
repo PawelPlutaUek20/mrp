@@ -17,7 +17,7 @@ function transpose(matrix: any[][]) {
 
 const App = () => {
   const [MRPPlanowanePrzyjecia, setMRPPlanowanePrzyjecia] = React.useState<
-    any[]
+    number[]
   >([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
 
   const [ghpVariables, setGhpVariables] = React.useState({
@@ -32,7 +32,7 @@ const App = () => {
     wielkoscPartii: 40,
   });
 
-  const getY = (ghp: any[][]): any[][] => {
+  const getY = (ghp: number[][]): number[][] => {
     const a = transpose(ghp).reduce(
       (acc, val, idx) =>
         idx === 0
@@ -57,7 +57,7 @@ const App = () => {
     return transpose(a);
   };
 
-  const getX = (ghp: any[][], czasRealizacji: number): any[][] => {
+  const getX = (ghp: number[][], czasRealizacji: number): number[][] => {
     const res = transpose(ghp).reduce((acc, val, index) => {
       return !val[0] && !val[1]
         ? [
@@ -73,14 +73,17 @@ const App = () => {
               undefined,
             ],
           ]
-        : acc[index - 1][2] - val[1] < 0
+        : index - 1 >= 0 && acc[index - 1][2] - val[1] < 0
         ? [
             ...acc,
             [
               val[1] || 0,
               MRPPlanowanePrzyjecia[index] || 0,
               mrpVariables.wielkoscPartii -
-                ((val[1] || 0) - (acc[index - 1][2] || 0)) +
+                ((val[1] || 0) -
+                  (index - 1 >= 0
+                    ? acc[index - 1][2] || 0
+                    : mrpVariables.naStanie)) +
                 (MRPPlanowanePrzyjecia[index] || 0),
               (val[1] || 0) - (acc[index - 1][2] || 0),
               undefined,
@@ -92,7 +95,9 @@ const App = () => {
             [
               val[1] || 0,
               MRPPlanowanePrzyjecia[index] || 0,
-              (acc[index - 1][2] || 0) -
+              (index - 1 >= 0
+                ? acc[index - 1][2] || 0
+                : mrpVariables.naStanie) -
                 (val[1] || 0) +
                 (MRPPlanowanePrzyjecia[index] || 0),
               undefined,
@@ -110,7 +115,7 @@ const App = () => {
     return res;
   };
 
-  const [GHP, setGHP] = React.useState(() => {
+  const [GHP, setGHP] = React.useState<number[][]>(() => {
     const emptyArr = Array.from(Array(3), () => new Array(10).fill(undefined));
     emptyArr[0][4] = 20;
     emptyArr[0][6] = 40;
@@ -119,7 +124,7 @@ const App = () => {
     return getY(emptyArr);
   });
 
-  const [x, setX] = React.useState<any[][]>(() =>
+  const [x, setX] = React.useState<number[][]>(() =>
     getX(GHP, mrpVariables.czasRealizacji)
   );
 
@@ -170,7 +175,6 @@ const App = () => {
                         <NumberInput
                           value={col || undefined}
                           hideControls
-                          disabled={index2 === 0}
                           onChange={(value: number) => {
                             setGHP((ghp) => {
                               const tempGHP = ghp;
@@ -190,11 +194,12 @@ const App = () => {
           </Table>
           <NumberInput
             label="Czas realizacji"
+            min={0}
             value={ghpVariables.czasRealizacji}
             onChange={(value: number) => {
               setGhpVariables((ghpVariables) => ({
                 ...ghpVariables,
-                czasRealizacji: value,
+                czasRealizacji: value || 0,
               }));
             }}
           />
@@ -247,31 +252,34 @@ const App = () => {
           </Table>
           <NumberInput
             label="Czas realizacji"
+            min={0}
             value={mrpVariables.czasRealizacji}
             onChange={(value: number) => {
               setMrpVariables((mrpVariables) => ({
                 ...mrpVariables,
-                czasRealizacji: value,
+                czasRealizacji: value || 0,
               }));
             }}
           />
           <NumberInput
             label="Na stanie"
+            min={0}
             value={mrpVariables.naStanie}
             onChange={(value: number) => {
               setMrpVariables((mrpVariables) => ({
                 ...mrpVariables,
-                naStanie: value,
+                naStanie: value || 0,
               }));
             }}
           />
           <NumberInput
             label="Wielkosc Partii"
+            min={0}
             value={mrpVariables.wielkoscPartii}
             onChange={(value: number) => {
               setMrpVariables((mrpVariables) => ({
                 ...mrpVariables,
-                wielkoscPartii: value,
+                wielkoscPartii: value || 0,
               }));
             }}
           />
