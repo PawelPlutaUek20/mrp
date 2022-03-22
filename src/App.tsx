@@ -94,37 +94,60 @@ const App = () => {
     >
       <ScrollArea p="md" style={{ height: "100%" }}>
         <Title order={1}>GHP</Title>
-        <Table my="md">
-          <tbody>
-            {GHP.map((row, index1) => (
-              <tr key={index1}>
-                {row.map((col, index2) =>
-                  index1 === Ghp.DOSTEPNE ? (
-                    <td style={{ height: 50.5, textAlign: "center" }}>{col}</td>
-                  ) : (
-                    <td>
-                      <NumberInput
-                        value={col || undefined}
-                        hideControls
-                        onChange={(value: number) => {
-                          setGHP((ghp) => {
-                            const tempGHP = ghp;
-                            tempGHP[index1][index2] = value;
-
-                            setX(
-                              getX(ghp, MRPPlanowanePrzyjecia, mrpVariables)
-                            );
-                            return getY(tempGHP, ghpVariables);
-                          });
-                        }}
-                      />
-                    </td>
-                  )
-                )}
+        <div style={{ display: "flex" }}>
+          <Table style={{ marginTop: 16, marginBottom: 16, maxWidth: 200 }}>
+            <thead>
+              <tr style={{ display: "flex", flexDirection: "column" }}>
+                <th>tydzien:</th>
+                <th style={{ height: 51 }}>Przewidywany popyt</th>
+                <th style={{ height: 51 }}>Produkcja</th>
+                <th style={{ height: 51 }}>Dostępne</th>
               </tr>
-            ))}
-          </tbody>
-        </Table>
+            </thead>
+          </Table>
+          <Table my="md">
+            <thead>
+              <tr>
+                {Array(10)
+                  .fill(undefined)
+                  .map((v, i) => (
+                    <th style={{ textAlign: "center" }}>{i + 1}</th>
+                  ))}
+              </tr>
+            </thead>
+            <tbody>
+              {GHP.map((row, index1) => (
+                <tr key={index1}>
+                  {row.map((col, index2) =>
+                    index1 === Ghp.DOSTEPNE ? (
+                      <td style={{ height: 50.5, textAlign: "center" }}>
+                        {col}
+                      </td>
+                    ) : (
+                      <td>
+                        <NumberInput
+                          value={col || undefined}
+                          hideControls
+                          onChange={(value: number) => {
+                            setGHP((ghp) => {
+                              const tempGHP = ghp;
+                              tempGHP[index1][index2] = value;
+
+                              setX(
+                                getX(ghp, MRPPlanowanePrzyjecia, mrpVariables)
+                              );
+                              return getY(tempGHP, ghpVariables);
+                            });
+                          }}
+                        />
+                      </td>
+                    )
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
         <NumberInput
           label="Czas realizacji"
           min={0}
@@ -151,48 +174,77 @@ const App = () => {
         <Title order={1}>MRP</Title>
         <Space h="md" />
         <Title order={2}>Rama</Title>
-        <Table my="md">
-          <tbody>
-            {transpose(x.slice(ghpVariables.czasRealizacji))?.map(
-              (row, index1) => (
-                <tr key={index1}>
-                  {row.map((col, index2) =>
-                    index1 !== Mrp.PLANOWANE_PRZYJECIA ? (
-                      <td style={{ height: 50.5, textAlign: "center" }}>
-                        {col}
-                      </td>
-                    ) : (
-                      <td>
-                        <NumberInput
-                          value={
-                            MRPPlanowanePrzyjecia[
-                              index2 + ghpVariables.czasRealizacji
-                            ] || undefined
-                          }
-                          hideControls
-                          onChange={(value: number) => {
-                            setMRPPlanowanePrzyjecia(
-                              (mrpPlanowanePrzyjecia) => {
-                                const tempGHP = mrpPlanowanePrzyjecia;
-                                tempGHP[index2 + ghpVariables.czasRealizacji] =
-                                  value;
+        <div style={{ display: "flex" }}>
+          <Table style={{ marginTop: 16, marginBottom: 16, maxWidth: 250 }}>
+            <thead>
+              <tr style={{ display: "flex", flexDirection: "column" }}>
+                <th>Dane produkcyjne / Okres</th>
+                <th style={{ height: 51 }}>Całkowite zapotrzebowanie</th>
+                <th style={{ height: 51 }}>Planowanie przyjecia</th>
+                <th style={{ height: 51 }}>Przewidywane na stanie</th>
+                <th style={{ height: 51 }}>Zapotrzeboawnie netto</th>
+                <th style={{ height: 51 }}>Planowanie zamowienia</th>
+                <th style={{ height: 51 }}>Planowane przyjecie zamowien</th>
+              </tr>
+            </thead>
+          </Table>
+          <Table my="md">
+            <thead>
+              <tr>
+                {MRPPlanowanePrzyjecia.slice(ghpVariables.czasRealizacji).map(
+                  (v, i) => (
+                    <th style={{ textAlign: "center" }}>{i + 1}</th>
+                  )
+                )}
+              </tr>
+            </thead>
+            <tbody>
+              {transpose(x.slice(ghpVariables.czasRealizacji))?.map(
+                (row, index1) => (
+                  <tr key={index1}>
+                    {row.map((col, index2) =>
+                      index1 !== Mrp.PLANOWANE_PRZYJECIA ? (
+                        <td style={{ height: 50.5, textAlign: "center" }}>
+                          {col}
+                        </td>
+                      ) : (
+                        <td>
+                          <NumberInput
+                            value={
+                              MRPPlanowanePrzyjecia[
+                                index2 + ghpVariables.czasRealizacji
+                              ] || undefined
+                            }
+                            hideControls
+                            onChange={(value: number) => {
+                              setMRPPlanowanePrzyjecia(
+                                (mrpPlanowanePrzyjecia) => {
+                                  const tempGHP = mrpPlanowanePrzyjecia;
+                                  tempGHP[
+                                    index2 + ghpVariables.czasRealizacji
+                                  ] = value;
 
-                                setX(
-                                  getX(GHP, MRPPlanowanePrzyjecia, mrpVariables)
-                                );
-                                return tempGHP;
-                              }
-                            );
-                          }}
-                        />
-                      </td>
-                    )
-                  )}
-                </tr>
-              )
-            )}
-          </tbody>
-        </Table>
+                                  setX(
+                                    getX(
+                                      GHP,
+                                      MRPPlanowanePrzyjecia,
+                                      mrpVariables
+                                    )
+                                  );
+                                  return tempGHP;
+                                }
+                              );
+                            }}
+                          />
+                        </td>
+                      )
+                    )}
+                  </tr>
+                )
+              )}
+            </tbody>
+          </Table>
+        </div>
         <NumberInput
           label="Czas realizacji"
           min={0}
@@ -228,55 +280,80 @@ const App = () => {
         />
         <Space h="md" />
         <Title order={2}>Nogi (4)</Title>
-        <Table my="md">
-          <tbody>
-            {transpose(nogiX.slice(ghpVariables.czasRealizacji))?.map(
-              (row, index1) => (
-                <tr key={index1}>
-                  {row.map((col, index2) =>
-                    index1 !== Mrp.PLANOWANE_PRZYJECIA ? (
-                      <td style={{ height: 50.5, textAlign: "center" }}>
-                        {col}
-                      </td>
-                    ) : (
-                      <td>
-                        <NumberInput
-                          value={
-                            MRPNogiPlanowanePrzyjecia[
-                              index2 + ghpVariables.czasRealizacji
-                            ] || undefined
-                          }
-                          hideControls
-                          onChange={(value: number) => {
-                            setMRPNogiPlanowanePrzyjecia(
-                              (mrpPlanowanePrzyjecia) => {
-                                const tempGHP = mrpPlanowanePrzyjecia;
-                                tempGHP[index2 + ghpVariables.czasRealizacji] =
-                                  value;
-                                const newGhp = GHP.map((v, i) =>
-                                  i === 1 ? v.map((w) => w * 4) : v
-                                );
-                                setNogiX(
-                                  getX(
-                                    newGhp,
-                                    MRPNogiPlanowanePrzyjecia,
-                                    mrpNogiVariables
-                                  )
-                                );
+        <div style={{ display: "flex" }}>
+          <Table style={{ marginTop: 16, marginBottom: 16, maxWidth: 250 }}>
+            <thead>
+              <tr style={{ display: "flex", flexDirection: "column" }}>
+                <th>Dane produkcyjne / Okres</th>
+                <th style={{ height: 51 }}>Całkowite zapotrzebowanie</th>
+                <th style={{ height: 51 }}>Planowanie przyjecia</th>
+                <th style={{ height: 51 }}>Przewidywane na stanie</th>
+                <th style={{ height: 51 }}>Zapotrzeboawnie netto</th>
+                <th style={{ height: 51 }}>Planowanie zamowienia</th>
+                <th style={{ height: 51 }}>Planowane przyjecie zamowien</th>
+              </tr>
+            </thead>
+          </Table>
+          <Table my="md">
+            <thead>
+              <tr>
+                {MRPNogiPlanowanePrzyjecia.slice(
+                  ghpVariables.czasRealizacji
+                ).map((v, i) => (
+                  <th style={{ textAlign: "center" }}>{i + 1}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {transpose(nogiX.slice(ghpVariables.czasRealizacji))?.map(
+                (row, index1) => (
+                  <tr key={index1}>
+                    {row.map((col, index2) =>
+                      index1 !== Mrp.PLANOWANE_PRZYJECIA ? (
+                        <td style={{ height: 50.5, textAlign: "center" }}>
+                          {col}
+                        </td>
+                      ) : (
+                        <td>
+                          <NumberInput
+                            value={
+                              MRPNogiPlanowanePrzyjecia[
+                                index2 + ghpVariables.czasRealizacji
+                              ] || undefined
+                            }
+                            hideControls
+                            onChange={(value: number) => {
+                              setMRPNogiPlanowanePrzyjecia(
+                                (mrpPlanowanePrzyjecia) => {
+                                  const tempGHP = mrpPlanowanePrzyjecia;
+                                  tempGHP[
+                                    index2 + ghpVariables.czasRealizacji
+                                  ] = value;
+                                  const newGhp = GHP.map((v, i) =>
+                                    i === 1 ? v.map((w) => w * 4) : v
+                                  );
+                                  setNogiX(
+                                    getX(
+                                      newGhp,
+                                      MRPNogiPlanowanePrzyjecia,
+                                      mrpNogiVariables
+                                    )
+                                  );
 
-                                return tempGHP;
-                              }
-                            );
-                          }}
-                        />
-                      </td>
-                    )
-                  )}
-                </tr>
-              )
-            )}
-          </tbody>
-        </Table>
+                                  return tempGHP;
+                                }
+                              );
+                            }}
+                          />
+                        </td>
+                      )
+                    )}
+                  </tr>
+                )
+              )}
+            </tbody>
+          </Table>
+        </div>
         <NumberInput
           label="Czas realizacji"
           min={0}
