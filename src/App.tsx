@@ -18,16 +18,26 @@ const App = () => {
     number[]
   >([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
 
+  const [MRPNogiPlanowanePrzyjecia, setMRPNogiPlanowanePrzyjecia] =
+    React.useState<number[]>([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+
   const [ghpVariables, setGhpVariables] = React.useState({
     czasRealizacji: 1,
     naStanie: 2,
   });
 
   const [mrpVariables, setMrpVariables] = React.useState({
-    czasRealizacji: 2,
+    czasRealizacji: 3,
     naStanie: 22,
     poziomBOM: 1,
     wielkoscPartii: 40,
+  });
+
+  const [mrpNogiVariables, setMrpNogiVariables] = React.useState({
+    czasRealizacji: 2,
+    naStanie: 40,
+    poziomBOM: 2,
+    wielkoscPartii: 120,
   });
 
   const [GHP, setGHP] = React.useState<number[][]>(() => {
@@ -43,11 +53,21 @@ const App = () => {
     getX(GHP, MRPPlanowanePrzyjecia, mrpVariables)
   );
 
+  const [nogiX, setNogiX] = React.useState<number[][]>(() => {
+    const newGhp = GHP.map((v, i) => (i === 1 ? v.map((w) => w * 4) : v));
+    return getX(newGhp, MRPNogiPlanowanePrzyjecia, mrpVariables);
+  });
+
   useEffect(
     () => setX(getX(GHP, MRPPlanowanePrzyjecia, mrpVariables)),
     [mrpVariables]
   );
   useEffect(() => setGHP(getY(GHP, ghpVariables)), [ghpVariables]);
+
+  useEffect(() => {
+    const newGhp = GHP.map((v, i) => (i === 1 ? v.map((w) => w * 4) : v));
+    setNogiX(getX(newGhp, MRPNogiPlanowanePrzyjecia, mrpNogiVariables));
+  }, [mrpNogiVariables]);
 
   return (
     <AppShell
@@ -129,6 +149,8 @@ const App = () => {
         />
         <Space h="xl" />
         <Title order={1}>MRP</Title>
+        <Space h="md" />
+        <Title order={2}>Rama</Title>
         <Table my="md">
           <tbody>
             {transpose(x.slice(ghpVariables.czasRealizacji))?.map(
@@ -199,6 +221,90 @@ const App = () => {
           value={mrpVariables.wielkoscPartii}
           onChange={(value: number) => {
             setMrpVariables((mrpVariables) => ({
+              ...mrpVariables,
+              wielkoscPartii: value || 0,
+            }));
+          }}
+        />
+        <Space h="md" />
+        <Title order={2}>Nogi (4)</Title>
+        <Table my="md">
+          <tbody>
+            {transpose(nogiX.slice(ghpVariables.czasRealizacji))?.map(
+              (row, index1) => (
+                <tr key={index1}>
+                  {row.map((col, index2) =>
+                    index1 !== Mrp.PLANOWANE_PRZYJECIA ? (
+                      <td style={{ height: 50.5, textAlign: "center" }}>
+                        {col}
+                      </td>
+                    ) : (
+                      <td>
+                        <NumberInput
+                          value={
+                            MRPNogiPlanowanePrzyjecia[
+                              index2 + ghpVariables.czasRealizacji
+                            ] || undefined
+                          }
+                          hideControls
+                          onChange={(value: number) => {
+                            setMRPNogiPlanowanePrzyjecia(
+                              (mrpPlanowanePrzyjecia) => {
+                                const tempGHP = mrpPlanowanePrzyjecia;
+                                tempGHP[index2 + ghpVariables.czasRealizacji] =
+                                  value;
+                                const newGhp = GHP.map((v, i) =>
+                                  i === 1 ? v.map((w) => w * 4) : v
+                                );
+                                setNogiX(
+                                  getX(
+                                    newGhp,
+                                    MRPNogiPlanowanePrzyjecia,
+                                    mrpNogiVariables
+                                  )
+                                );
+
+                                return tempGHP;
+                              }
+                            );
+                          }}
+                        />
+                      </td>
+                    )
+                  )}
+                </tr>
+              )
+            )}
+          </tbody>
+        </Table>
+        <NumberInput
+          label="Czas realizacji"
+          min={0}
+          value={mrpNogiVariables.czasRealizacji}
+          onChange={(value: number) => {
+            setMrpNogiVariables((mrpVariables) => ({
+              ...mrpVariables,
+              czasRealizacji: value || 0,
+            }));
+          }}
+        />
+        <NumberInput
+          label="Na stanie"
+          min={0}
+          value={mrpNogiVariables.naStanie}
+          onChange={(value: number) => {
+            setMrpNogiVariables((mrpVariables) => ({
+              ...mrpVariables,
+              naStanie: value || 0,
+            }));
+          }}
+        />
+        <NumberInput
+          label="Wielkosc Partii"
+          min={0}
+          value={mrpNogiVariables.wielkoscPartii}
+          onChange={(value: number) => {
+            setMrpNogiVariables((mrpVariables) => ({
               ...mrpVariables,
               wielkoscPartii: value || 0,
             }));
