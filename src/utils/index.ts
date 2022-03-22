@@ -125,3 +125,51 @@ export const getY = (
   );
   return transpose(a);
 };
+
+export const getZ = (
+  ghp: number[][],
+  ghpVariables: {
+    czasRealizacji: number;
+    naStanie: number;
+  }
+): number[][] => {
+  const a = transpose(ghp).reduce(
+    (acc, val, idx) =>
+      idx === 0
+        ? [
+            ...acc,
+            [
+              val[Ghp.PRZEWIDYWANY_POPTY] || 0,
+              val[Ghp.PRODUKCJA] || 0,
+              (val[Ghp.PRODUKCJA] || 0) -
+                (val[Ghp.PRZEWIDYWANY_POPTY] || 0) +
+                ghpVariables.naStanie,
+            ],
+          ]
+        : [
+            ...acc,
+            [
+              val[Ghp.PRZEWIDYWANY_POPTY] || 0,
+              val[Ghp.PRODUKCJA] || 0,
+              (val[Ghp.PRODUKCJA] || 0) -
+                (val[Ghp.PRZEWIDYWANY_POPTY] || 0) +
+                (acc[idx - 1][Ghp.DOSTEPNE] || 0),
+            ],
+          ],
+    []
+  );
+  return transpose(a);
+};
+
+export const getNogiMrp = (
+  ghp: number[][],
+  mrpPlanowanePrzyjecia: number[],
+  mrpVariables: {
+    czasRealizacji: number;
+    naStanie: number;
+    poziomBOM: number;
+    wielkoscPartii: number;
+  }
+): any => {
+  return getX(ghp, mrpPlanowanePrzyjecia, mrpVariables).map((val:any, index) => (index === 0 ? val*4 : val ))
+};

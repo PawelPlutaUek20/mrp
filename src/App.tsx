@@ -11,7 +11,7 @@ import {
   Space,
 } from "@mantine/core";
 
-import { getX, getY, Ghp, Mrp, transpose } from "./utils";
+import { getX, getY, Ghp, Mrp, transpose, getNogiMrp } from "./utils";
 
 const App = () => {
   const [MRPPlanowanePrzyjecia, setMRPPlanowanePrzyjecia] = React.useState<
@@ -204,6 +204,50 @@ const App = () => {
             }));
           }}
         />
+        <Space h="xl" />
+        <Title order={1}>Nogi</Title>
+        <Table my="md">
+          <tbody>
+            {transpose(x.slice(ghpVariables.czasRealizacji))?.map(
+              (row, index1) => (
+                <tr key={index1}>
+                  {row.map((col, index2) =>
+                    index1 !== Mrp.PLANOWANE_PRZYJECIA ? (
+                      <td style={{ height: 50.5, textAlign: "center" }}>
+                        {col}
+                      </td>
+                    ) : (
+                      <td>
+                        <NumberInput
+                          value={
+                            MRPPlanowanePrzyjecia[
+                              (index2 + ghpVariables.czasRealizacji)
+                            ] || undefined
+                          }
+                          hideControls
+                          onChange={(value: number) => {
+                            setMRPPlanowanePrzyjecia(
+                              (mrpPlanowanePrzyjecia) => {
+                                const tempGHP = mrpPlanowanePrzyjecia;
+                                tempGHP[index2 + ghpVariables.czasRealizacji] =
+                                  value;
+
+                                setX(
+                                  getNogiMrp(GHP, MRPPlanowanePrzyjecia, mrpVariables)
+                                );
+                                return tempGHP;
+                              }
+                            );
+                          }}
+                        />
+                      </td>
+                    )
+                  )}
+                </tr>
+              )
+            )}
+          </tbody>
+        </Table>
       </ScrollArea>
     </AppShell>
   );
