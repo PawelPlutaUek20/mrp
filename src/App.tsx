@@ -67,7 +67,7 @@ const App = () => {
   useEffect(() => {
     const newGhp = GHP.map((v, i) => (i === 1 ? v.map((w) => w * 4) : v));
     setNogiX(getX(newGhp, MRPNogiPlanowanePrzyjecia, mrpNogiVariables));
-  }, [mrpNogiVariables]);
+  }, [mrpNogiVariables, GHP]);
 
   return (
     <AppShell
