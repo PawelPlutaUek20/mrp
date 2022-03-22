@@ -96,14 +96,20 @@ const App = () => {
         <Title order={1}>GHP</Title>
         <div style={{ display: "flex" }}>
           <Table style={{ marginTop: 16, marginBottom: 16, maxWidth: 200 }}>
-            <thead>
-              <tr style={{ display: "flex", flexDirection: "column" }}>
-                <th>tydzien:</th>
-                <th style={{ height: 51 }}>Przewidywany popyt</th>
-                <th style={{ height: 51 }}>Produkcja</th>
-                <th style={{ height: 51 }}>Dostępne</th>
+            <tbody>
+              <tr>
+                <td>tydzien:</td>
               </tr>
-            </thead>
+              <tr>
+                <td style={{ height: 51 }}>Przewidywany popyt</td>
+              </tr>
+              <tr>
+                <td style={{ height: 51 }}>Produkcja</td>
+              </tr>
+              <tr>
+                <td style={{ height: 51 }}>Dostępne</td>
+              </tr>
+            </tbody>
           </Table>
           <Table my="md">
             <thead>
@@ -111,13 +117,15 @@ const App = () => {
                 {Array(10)
                   .fill(undefined)
                   .map((v, i) => (
-                    <th style={{ textAlign: "center" }}>{i + 1}</th>
+                    <th style={{ textAlign: "center", fontWeight: "normal" }}>
+                      {i + 1}
+                    </th>
                   ))}
               </tr>
             </thead>
             <tbody>
               {GHP.map((row, index1) => (
-                <tr key={index1}>
+                <tr style={{ height: 51 }} key={index1}>
                   {row.map((col, index2) =>
                     index1 === Ghp.DOSTEPNE ? (
                       <td style={{ height: 50.5, textAlign: "center" }}>
@@ -176,24 +184,38 @@ const App = () => {
         <Title order={2}>Rama</Title>
         <div style={{ display: "flex" }}>
           <Table style={{ marginTop: 16, marginBottom: 16, maxWidth: 250 }}>
-            <thead>
-              <tr style={{ display: "flex", flexDirection: "column" }}>
-                <th>Dane produkcyjne / Okres</th>
-                <th style={{ height: 51 }}>Całkowite zapotrzebowanie</th>
-                <th style={{ height: 51 }}>Planowanie przyjecia</th>
-                <th style={{ height: 51 }}>Przewidywane na stanie</th>
-                <th style={{ height: 51 }}>Zapotrzeboawnie netto</th>
-                <th style={{ height: 51 }}>Planowanie zamowienia</th>
-                <th style={{ height: 51 }}>Planowane przyjecie zamowien</th>
+            <tbody>
+              <tr>
+                <td>Dane produkcyjne / Okres</td>
               </tr>
-            </thead>
+              <tr>
+                <td style={{ height: 51 }}>Całkowite zapotrzebowanie</td>
+              </tr>
+              <tr>
+                <td style={{ height: 51 }}>Planowanie przyjecia</td>
+              </tr>
+              <tr>
+                <td style={{ height: 51 }}>Przewidywane na stanie</td>
+              </tr>
+              <tr>
+                <td style={{ height: 51 }}>Zapotrzeboawnie netto</td>
+              </tr>
+              <tr>
+                <td style={{ height: 51 }}>Planowanie zamowienia</td>
+              </tr>
+              <tr>
+                <td style={{ height: 51 }}>Planowane przyjecie zamowien</td>
+              </tr>
+            </tbody>
           </Table>
           <Table my="md">
             <thead>
               <tr>
                 {MRPPlanowanePrzyjecia.slice(ghpVariables.czasRealizacji).map(
                   (v, i) => (
-                    <th style={{ textAlign: "center" }}>{i + 1}</th>
+                    <th style={{ textAlign: "center", fontWeight: "normal" }}>
+                      {i + 1}
+                    </th>
                   )
                 )}
               </tr>
@@ -201,7 +223,7 @@ const App = () => {
             <tbody>
               {transpose(x.slice(ghpVariables.czasRealizacji))?.map(
                 (row, index1) => (
-                  <tr key={index1}>
+                  <tr key={index1} style={{ height: 51 }}>
                     {row.map((col, index2) =>
                       index1 !== Mrp.PLANOWANE_PRZYJECIA ? (
                         <td style={{ height: 50.5, textAlign: "center" }}>
@@ -282,17 +304,29 @@ const App = () => {
         <Title order={2}>Nogi (4)</Title>
         <div style={{ display: "flex" }}>
           <Table style={{ marginTop: 16, marginBottom: 16, maxWidth: 250 }}>
-            <thead>
-              <tr style={{ display: "flex", flexDirection: "column" }}>
-                <th>Dane produkcyjne / Okres</th>
-                <th style={{ height: 51 }}>Całkowite zapotrzebowanie</th>
-                <th style={{ height: 51 }}>Planowanie przyjecia</th>
-                <th style={{ height: 51 }}>Przewidywane na stanie</th>
-                <th style={{ height: 51 }}>Zapotrzeboawnie netto</th>
-                <th style={{ height: 51 }}>Planowanie zamowienia</th>
-                <th style={{ height: 51 }}>Planowane przyjecie zamowien</th>
+            <tbody>
+              <tr>
+                <td>Dane produkcyjne / Okres</td>
               </tr>
-            </thead>
+              <tr>
+                <td style={{ height: 51 }}>Całkowite zapotrzebowanie</td>
+              </tr>
+              <tr>
+                <td style={{ height: 51 }}>Planowanie przyjecia</td>
+              </tr>
+              <tr>
+                <td style={{ height: 51 }}>Przewidywane na stanie</td>
+              </tr>
+              <tr>
+                <td style={{ height: 51 }}>Zapotrzeboawnie netto</td>
+              </tr>
+              <tr>
+                <td style={{ height: 51 }}>Planowanie zamowienia</td>
+              </tr>
+              <tr>
+                <td style={{ height: 51 }}>Planowane przyjecie zamowien</td>
+              </tr>
+            </tbody>
           </Table>
           <Table my="md">
             <thead>
@@ -300,14 +334,16 @@ const App = () => {
                 {MRPNogiPlanowanePrzyjecia.slice(
                   ghpVariables.czasRealizacji
                 ).map((v, i) => (
-                  <th style={{ textAlign: "center" }}>{i + 1}</th>
+                  <th style={{ textAlign: "center", fontWeight: "normal" }}>
+                    {i + 1}
+                  </th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {transpose(nogiX.slice(ghpVariables.czasRealizacji))?.map(
                 (row, index1) => (
-                  <tr key={index1}>
+                  <tr key={index1} style={{ height: 51 }}>
                     {row.map((col, index2) =>
                       index1 !== Mrp.PLANOWANE_PRZYJECIA ? (
                         <td style={{ height: 50.5, textAlign: "center" }}>
