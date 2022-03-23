@@ -44,13 +44,22 @@ export const getX = (
               ? (acc[index - 1][Mrp.PRZEWIDYWANE_NA_STANIE] || 0) +
                 (mrpPlanowanePrzyjecia[index] || 0)
               : mrpVariables.naStanie + (mrpPlanowanePrzyjecia[index] || 0),
-            undefined,
+            (acc[index - 1]
+              ? (acc[index - 1][Mrp.PRZEWIDYWANE_NA_STANIE] || 0) +
+                (mrpPlanowanePrzyjecia[index] || 0)
+              : mrpVariables.naStanie + (mrpPlanowanePrzyjecia[index] || 0)) <
+              0 &&
+              -(acc[index - 1]
+                ? (acc[index - 1][Mrp.PRZEWIDYWANE_NA_STANIE] || 0) +
+                  (mrpPlanowanePrzyjecia[index] || 0)
+                : mrpVariables.naStanie + (mrpPlanowanePrzyjecia[index] || 0)),
             undefined,
             undefined,
           ],
         ]
       : index - 1 >= 0 &&
-        index - mrpVariables.czasRealizacji - ghpVariables.czasRealizacji >= 0 &&
+        index - mrpVariables.czasRealizacji - ghpVariables.czasRealizacji >=
+          0 &&
         acc[index - 1][Mrp.PRZEWIDYWANE_NA_STANIE] - val[Ghp.PRODUKCJA] < 0
       ? [
           ...acc,
@@ -79,7 +88,19 @@ export const getX = (
               : mrpVariables.naStanie) -
               (val[Ghp.PRODUKCJA] || 0) +
               (mrpPlanowanePrzyjecia[index] || 0),
-            undefined,
+            (index - 1 >= 0
+              ? acc[index - 1][Mrp.PRZEWIDYWANE_NA_STANIE] || 0
+              : mrpVariables.naStanie) -
+              (val[Ghp.PRODUKCJA] || 0) +
+              (mrpPlanowanePrzyjecia[index] || 0) <
+              0 &&
+              -(
+                (index - 1 >= 0
+                  ? acc[index - 1][Mrp.PRZEWIDYWANE_NA_STANIE] || 0
+                  : mrpVariables.naStanie) -
+                (val[Ghp.PRODUKCJA] || 0) +
+                (mrpPlanowanePrzyjecia[index] || 0)
+              ),
             undefined,
             undefined,
           ],
