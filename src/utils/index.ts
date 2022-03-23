@@ -17,6 +17,8 @@ export const transpose = (matrix: any[][]) => {
   return matrix[0]?.map((col, i) => matrix.map((row) => row[i]));
 };
 
+// TODO: zapotrzebowanie netto abs(Przwidywane na stanie)
+
 export const getX = (
   ghp: number[][],
   mrpPlanowanePrzyjecia: number[],
@@ -25,6 +27,10 @@ export const getX = (
     naStanie: number;
     poziomBOM: number;
     wielkoscPartii: number;
+  },
+  ghpVariables: {
+    czasRealizacji: number;
+    naStanie: number;
   }
 ): number[][] => {
   const res = transpose(ghp).reduce((acc, val, index) => {
@@ -44,6 +50,7 @@ export const getX = (
           ],
         ]
       : index - 1 >= 0 &&
+        index - mrpVariables.czasRealizacji - ghpVariables.czasRealizacji >= 0 &&
         acc[index - 1][Mrp.PRZEWIDYWANE_NA_STANIE] - val[Ghp.PRODUKCJA] < 0
       ? [
           ...acc,

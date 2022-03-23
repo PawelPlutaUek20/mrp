@@ -50,23 +50,23 @@ const App = () => {
   });
 
   const [x, setX] = React.useState<number[][]>(() =>
-    getX(GHP, MRPPlanowanePrzyjecia, mrpVariables)
+    getX(GHP, MRPPlanowanePrzyjecia, mrpVariables, ghpVariables)
   );
 
   const [nogiX, setNogiX] = React.useState<number[][]>(() => {
     const newGhp = GHP.map((v, i) => (i === 1 ? v.map((w) => w * 4) : v));
-    return getX(newGhp, MRPNogiPlanowanePrzyjecia, mrpVariables);
+    return getX(newGhp, MRPNogiPlanowanePrzyjecia, mrpVariables, ghpVariables);
   });
 
   useEffect(
-    () => setX(getX(GHP, MRPPlanowanePrzyjecia, mrpVariables)),
+    () => setX(getX(GHP, MRPPlanowanePrzyjecia, mrpVariables, ghpVariables)),
     [mrpVariables]
   );
   useEffect(() => setGHP(getY(GHP, ghpVariables)), [ghpVariables]);
 
   useEffect(() => {
     const newGhp = GHP.map((v, i) => (i === 1 ? v.map((w) => w * 4) : v));
-    setNogiX(getX(newGhp, MRPNogiPlanowanePrzyjecia, mrpNogiVariables));
+    setNogiX(getX(newGhp, MRPNogiPlanowanePrzyjecia, mrpNogiVariables, ghpVariables));
   }, [mrpNogiVariables, GHP]);
 
   return (
@@ -142,7 +142,12 @@ const App = () => {
                               tempGHP[index1][index2] = value;
 
                               setX(
-                                getX(ghp, MRPPlanowanePrzyjecia, mrpVariables)
+                                getX(
+                                  ghp,
+                                  MRPPlanowanePrzyjecia,
+                                  mrpVariables,
+                                  ghpVariables
+                                )
                               );
                               return getY(tempGHP, ghpVariables);
                             });
@@ -250,7 +255,8 @@ const App = () => {
                                     getX(
                                       GHP,
                                       MRPPlanowanePrzyjecia,
-                                      mrpVariables
+                                      mrpVariables,
+                                      ghpVariables
                                     )
                                   );
                                   return tempGHP;
@@ -372,7 +378,8 @@ const App = () => {
                                     getX(
                                       newGhp,
                                       MRPNogiPlanowanePrzyjecia,
-                                      mrpNogiVariables
+                                      mrpNogiVariables,
+                                      ghpVariables
                                     )
                                   );
 
