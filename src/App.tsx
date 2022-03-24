@@ -21,6 +21,9 @@ const App = () => {
   const [MRPNogiPlanowanePrzyjecia, setMRPNogiPlanowanePrzyjecia] =
     React.useState<number[]>([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
 
+  const [BOM2StelazPlanowanePrzyjecia, setBOM2StelazPlanowanePrzyjecia] =
+    React.useState<number[]>([0, 30, 0, 0, 0, 0, 0, 0, 0, 0]);
+
   const [ghpVariables, setGhpVariables] = React.useState({
     czasRealizacji: 1,
     naStanie: 2,
@@ -38,6 +41,13 @@ const App = () => {
     naStanie: 40,
     poziomBOM: 2,
     wielkoscPartii: 120,
+  });
+
+  const [bom2StelazVariables, setbom2StelazVariables] = React.useState({
+    czasRealizacji: 1,
+    naStanie: 10,
+    poziomBOM: 2,
+    wielkoscPartii: 10,
   });
 
   const [GHP, setGHP] = React.useState<number[][]>(() => {
@@ -58,16 +68,42 @@ const App = () => {
     return getX(newGhp, MRPNogiPlanowanePrzyjecia, mrpVariables, ghpVariables);
   });
 
+  const [x2, setX2] = React.useState<number[][]>(() => {
+    const fakeGHP = Array.from(Array(1), () => new Array(10).fill(undefined));
+    fakeGHP[Ghp.PRODUKCJA] = transpose(x)[4];
+    return getX(
+      fakeGHP,
+      BOM2StelazPlanowanePrzyjecia,
+      bom2StelazVariables,
+      ghpVariables
+    );
+  });
+
   useEffect(
     () => setX(getX(GHP, MRPPlanowanePrzyjecia, mrpVariables, ghpVariables)),
-    [mrpVariables]
+    [mrpVariables, ghpVariables, GHP]
   );
   useEffect(() => setGHP(getY(GHP, ghpVariables)), [ghpVariables]);
 
   useEffect(() => {
     const newGhp = GHP.map((v, i) => (i === 1 ? v.map((w) => w * 4) : v));
-    setNogiX(getX(newGhp, MRPNogiPlanowanePrzyjecia, mrpNogiVariables, ghpVariables));
-  }, [mrpNogiVariables, GHP]);
+    setNogiX(
+      getX(newGhp, MRPNogiPlanowanePrzyjecia, mrpNogiVariables, ghpVariables)
+    );
+  }, [mrpNogiVariables, ghpVariables, GHP]);
+
+  useEffect(() => {
+    const fakeGHP = Array.from(Array(1), () => new Array(10).fill(undefined));
+    fakeGHP[Ghp.PRODUKCJA] = transpose(x)[4];
+    setX2(
+      getX(
+        fakeGHP,
+        BOM2StelazPlanowanePrzyjecia,
+        bom2StelazVariables,
+        ghpVariables
+      )
+    );
+  }, [bom2StelazVariables, mrpVariables, x]);
 
   return (
     <AppShell
@@ -425,6 +461,130 @@ const App = () => {
           value={mrpNogiVariables.wielkoscPartii}
           onChange={(value: number) => {
             setMrpNogiVariables((mrpVariables) => ({
+              ...mrpVariables,
+              wielkoscPartii: value || 0,
+            }));
+          }}
+        />
+        <Space h="md" />
+        <Title order={2}>Stelaż</Title>
+        <div style={{ display: "flex" }}>
+          <Table style={{ marginTop: 16, marginBottom: 16, maxWidth: 250 }}>
+            <tbody>
+              <tr>
+                <td>Dane produkcyjne / Okres</td>
+              </tr>
+              <tr>
+                <td style={{ height: 51 }}>Całkowite zapotrzebowanie</td>
+              </tr>
+              <tr>
+                <td style={{ height: 51 }}>Planowanie przyjecia</td>
+              </tr>
+              <tr>
+                <td style={{ height: 51 }}>Przewidywane na stanie</td>
+              </tr>
+              <tr>
+                <td style={{ height: 51 }}>Zapotrzeboawnie netto</td>
+              </tr>
+              <tr>
+                <td style={{ height: 51 }}>Planowanie zamowienia</td>
+              </tr>
+              <tr>
+                <td style={{ height: 51 }}>Planowane przyjecie zamowien</td>
+              </tr>
+            </tbody>
+          </Table>
+          <Table my="md">
+            <thead>
+              <tr>
+                {BOM2StelazPlanowanePrzyjecia.slice(
+                  ghpVariables.czasRealizacji
+                ).map((v, i) => (
+                  <th style={{ textAlign: "center", fontWeight: "normal" }}>
+                    {i + 1}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {transpose(x2.slice(ghpVariables.czasRealizacji))?.map(
+                (row, index1) => (
+                  <tr key={index1} style={{ height: 51 }}>
+                    {row.map((col, index2) =>
+                      index1 !== Mrp.PLANOWANE_PRZYJECIA ? (
+                        <td style={{ height: 50.5, textAlign: "center" }}>
+                          {col}
+                        </td>
+                      ) : (
+                        <td>
+                          <NumberInput
+                            value={
+                              BOM2StelazPlanowanePrzyjecia[
+                                index2 + ghpVariables.czasRealizacji
+                              ] || undefined
+                            }
+                            hideControls
+                            onChange={(value: number) => {
+                              setBOM2StelazPlanowanePrzyjecia(
+                                (mrpPlanowanePrzyjecia) => {
+                                  const tempGHP = mrpPlanowanePrzyjecia;
+                                  tempGHP[
+                                    index2 + ghpVariables.czasRealizacji
+                                  ] = value;
+                                  const fakeGHP = Array.from(Array(1), () =>
+                                    new Array(10).fill(undefined)
+                                  );
+                                  fakeGHP[Ghp.PRODUKCJA] = transpose(x)[4];
+                                  setX2(
+                                    getX(
+                                      fakeGHP,
+                                      tempGHP,
+                                      bom2StelazVariables,
+                                      ghpVariables
+                                    )
+                                  );
+                                  return tempGHP;
+                                }
+                              );
+                            }}
+                          />
+                        </td>
+                      )
+                    )}
+                  </tr>
+                )
+              )}
+            </tbody>
+          </Table>
+        </div>
+        <NumberInput
+          label="Czas realizacji"
+          min={0}
+          value={bom2StelazVariables.czasRealizacji}
+          onChange={(value: number) => {
+            setbom2StelazVariables((mrpVariables) => ({
+              ...mrpVariables,
+              czasRealizacji: value || 0,
+            }));
+          }}
+        />
+        <NumberInput
+          label="Na stanie"
+          min={0}
+          value={bom2StelazVariables.naStanie}
+          onChange={(value: number) => {
+            setbom2StelazVariables((mrpVariables) => ({
+              ...mrpVariables,
+              naStanie: value || 0,
+            }));
+          }}
+        />
+        <NumberInput
+          label="Wielkosc Partii"
+          min={0}
+          value={bom2StelazVariables.wielkoscPartii}
+          onChange={(value: number) => {
+            setbom2StelazVariables((mrpVariables) => ({
               ...mrpVariables,
               wielkoscPartii: value || 0,
             }));
