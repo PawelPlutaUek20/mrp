@@ -6,50 +6,58 @@ import {
   ScrollArea,
   Title,
   Text,
-  Table,
-  NumberInput,
   Space,
 } from "@mantine/core";
+import { useSetState } from "@mantine/hooks";
 
-import { getX, getY, Ghp, Mrp, transpose } from "./utils";
+import { getX, getY, Ghp, transpose } from "./utils";
+import { MrpTable, GhpTable } from "./tables";
 
 const App = () => {
+  // Rama input row
   const [MRPPlanowanePrzyjecia, setMRPPlanowanePrzyjecia] = React.useState<
     number[]
   >([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
 
+  // Nogi input row
   const [MRPNogiPlanowanePrzyjecia, setMRPNogiPlanowanePrzyjecia] =
     React.useState<number[]>([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
 
+  // Stelaz input row
   const [BOM2StelazPlanowanePrzyjecia, setBOM2StelazPlanowanePrzyjecia] =
     React.useState<number[]>([0, 30, 0, 0, 0, 0, 0, 0, 0, 0]);
 
-  const [ghpVariables, setGhpVariables] = React.useState({
+  // Ghp variables
+  const [ghpVariables, setGhpVariables] = useSetState({
     czasRealizacji: 1,
     naStanie: 2,
   });
 
-  const [mrpVariables, setMrpVariables] = React.useState({
+  // Rama variables
+  const [mrpVariables, setMrpVariables] = useSetState({
     czasRealizacji: 3,
     naStanie: 22,
     poziomBOM: 1,
     wielkoscPartii: 40,
   });
 
-  const [mrpNogiVariables, setMrpNogiVariables] = React.useState({
+  // Nogi Variables
+  const [mrpNogiVariables, setMrpNogiVariables] = useSetState({
     czasRealizacji: 2,
     naStanie: 40,
     poziomBOM: 2,
     wielkoscPartii: 120,
   });
 
-  const [bom2StelazVariables, setbom2StelazVariables] = React.useState({
+  // Stelaz variables
+  const [bom2StelazVariables, setbom2StelazVariables] = useSetState({
     czasRealizacji: 1,
     naStanie: 10,
     poziomBOM: 2,
     wielkoscPartii: 10,
   });
 
+  // GHP table
   const [GHP, setGHP] = React.useState<number[][]>(() => {
     const emptyArr = Array.from(Array(3), () => new Array(10).fill(undefined));
     emptyArr[Ghp.PRZEWIDYWANY_POPTY][4] = 20;
@@ -59,15 +67,18 @@ const App = () => {
     return getY(emptyArr, ghpVariables);
   });
 
+  // Rama table
   const [x, setX] = React.useState<number[][]>(() =>
     getX(GHP, MRPPlanowanePrzyjecia, mrpVariables, ghpVariables)
   );
 
+  // Nogi table
   const [nogiX, setNogiX] = React.useState<number[][]>(() => {
     const newGhp = GHP.map((v, i) => (i === 1 ? v.map((w) => w * 4) : v));
     return getX(newGhp, MRPNogiPlanowanePrzyjecia, mrpVariables, ghpVariables);
   });
 
+  // Stelaz table
   const [x2, setX2] = React.useState<number[][]>(() => {
     const fakeGHP = Array.from(Array(1), () => new Array(10).fill(undefined));
     fakeGHP[Ghp.PRODUKCJA] = transpose(x)[4];
@@ -105,6 +116,48 @@ const App = () => {
     );
   }, [bom2StelazVariables, mrpVariables, x]);
 
+  const updateStelaz = (value: number, index: number) =>
+    setBOM2StelazPlanowanePrzyjecia((mrpPlanowanePrzyjecia) => {
+      const tempGHP = mrpPlanowanePrzyjecia;
+      tempGHP[index + ghpVariables.czasRealizacji] = value;
+      const fakeGHP = Array.from(Array(1), () => new Array(10).fill(undefined));
+      fakeGHP[Ghp.PRODUKCJA] = transpose(x)[4];
+      setX2(getX(fakeGHP, tempGHP, bom2StelazVariables, ghpVariables));
+      return tempGHP;
+    });
+
+  const updateNogi = (value: number, index: number) =>
+    setMRPNogiPlanowanePrzyjecia((mrpPlanowanePrzyjecia) => {
+      const tempGHP = mrpPlanowanePrzyjecia;
+      tempGHP[index + ghpVariables.czasRealizacji] = value;
+      const newGhp = GHP.map((v, i) => (i === 1 ? v.map((w) => w * 4) : v));
+      setNogiX(
+        getX(newGhp, MRPNogiPlanowanePrzyjecia, mrpNogiVariables, ghpVariables)
+      );
+
+      return tempGHP;
+    });
+
+  const updateRama = (value: number, index: number) => {
+    setMRPPlanowanePrzyjecia((mrpPlanowanePrzyjecia) => {
+      const tempGHP = mrpPlanowanePrzyjecia;
+      tempGHP[index + ghpVariables.czasRealizacji] = value;
+
+      setX(getX(GHP, MRPPlanowanePrzyjecia, mrpVariables, ghpVariables));
+      return tempGHP;
+    });
+  };
+
+  const updateGhp = (value: number, index1: number, index2: number) => {
+    setGHP((ghp) => {
+      const tempGHP = ghp;
+      tempGHP[index1][index2] = value;
+
+      setX(getX(ghp, MRPPlanowanePrzyjecia, mrpVariables, ghpVariables));
+      return getY(tempGHP, ghpVariables);
+    });
+  };
+
   return (
     <AppShell
       padding={0}
@@ -130,464 +183,50 @@ const App = () => {
     >
       <ScrollArea p="md" style={{ height: "100%" }}>
         <Title order={1}>GHP</Title>
-        <div style={{ display: "flex" }}>
-          <Table style={{ marginTop: 16, marginBottom: 16, maxWidth: 200 }}>
-            <tbody>
-              <tr>
-                <td>tydzien:</td>
-              </tr>
-              <tr>
-                <td style={{ height: 51 }}>Przewidywany popyt</td>
-              </tr>
-              <tr>
-                <td style={{ height: 51 }}>Produkcja</td>
-              </tr>
-              <tr>
-                <td style={{ height: 51 }}>Dostępne</td>
-              </tr>
-            </tbody>
-          </Table>
-          <Table my="md">
-            <thead>
-              <tr>
-                {Array(10)
-                  .fill(undefined)
-                  .map((v, i) => (
-                    <th style={{ textAlign: "center", fontWeight: "normal" }}>
-                      {i + 1}
-                    </th>
-                  ))}
-              </tr>
-            </thead>
-            <tbody>
-              {GHP.map((row, index1) => (
-                <tr style={{ height: 51 }} key={index1}>
-                  {row.map((col, index2) =>
-                    index1 === Ghp.DOSTEPNE ? (
-                      <td style={{ height: 50.5, textAlign: "center" }}>
-                        {col}
-                      </td>
-                    ) : (
-                      <td>
-                        <NumberInput
-                          value={col || undefined}
-                          hideControls
-                          onChange={(value: number) => {
-                            setGHP((ghp) => {
-                              const tempGHP = ghp;
-                              tempGHP[index1][index2] = value;
-
-                              setX(
-                                getX(
-                                  ghp,
-                                  MRPPlanowanePrzyjecia,
-                                  mrpVariables,
-                                  ghpVariables
-                                )
-                              );
-                              return getY(tempGHP, ghpVariables);
-                            });
-                          }}
-                        />
-                      </td>
-                    )
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        </div>
-        <NumberInput
-          label="Czas realizacji"
-          min={0}
-          value={ghpVariables.czasRealizacji}
-          onChange={(value: number) => {
-            setGhpVariables((ghpVariables) => ({
-              ...ghpVariables,
-              czasRealizacji: value || 0,
-            }));
-          }}
-        />
-        <NumberInput
-          label="Na stanie"
-          min={0}
-          value={ghpVariables.naStanie}
-          onChange={(value: number) => {
-            setGhpVariables((ghpVariables) => ({
-              ...ghpVariables,
-              naStanie: value || 0,
-            }));
+        <GhpTable
+          table={GHP}
+          setTableData={updateGhp}
+          variablesState={{
+            state: ghpVariables,
+            setState: setGhpVariables,
           }}
         />
         <Space h="xl" />
         <Title order={1}>MRP</Title>
         <Space h="md" />
         <Title order={2}>Rama</Title>
-        <div style={{ display: "flex" }}>
-          <Table style={{ marginTop: 16, marginBottom: 16, maxWidth: 250 }}>
-            <tbody>
-              <tr>
-                <td>Dane produkcyjne / Okres</td>
-              </tr>
-              <tr>
-                <td style={{ height: 51 }}>Całkowite zapotrzebowanie</td>
-              </tr>
-              <tr>
-                <td style={{ height: 51 }}>Planowanie przyjecia</td>
-              </tr>
-              <tr>
-                <td style={{ height: 51 }}>Przewidywane na stanie</td>
-              </tr>
-              <tr>
-                <td style={{ height: 51 }}>Zapotrzeboawnie netto</td>
-              </tr>
-              <tr>
-                <td style={{ height: 51 }}>Planowanie zamowienia</td>
-              </tr>
-              <tr>
-                <td style={{ height: 51 }}>Planowane przyjecie zamowien</td>
-              </tr>
-            </tbody>
-          </Table>
-          <Table my="md">
-            <thead>
-              <tr>
-                {MRPPlanowanePrzyjecia.slice(ghpVariables.czasRealizacji).map(
-                  (v, i) => (
-                    <th style={{ textAlign: "center", fontWeight: "normal" }}>
-                      {i + 1}
-                    </th>
-                  )
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {transpose(x.slice(ghpVariables.czasRealizacji))?.map(
-                (row, index1) => (
-                  <tr key={index1} style={{ height: 51 }}>
-                    {row.map((col, index2) =>
-                      index1 !== Mrp.PLANOWANE_PRZYJECIA ? (
-                        <td style={{ height: 50.5, textAlign: "center" }}>
-                          {col}
-                        </td>
-                      ) : (
-                        <td>
-                          <NumberInput
-                            value={
-                              MRPPlanowanePrzyjecia[
-                                index2 + ghpVariables.czasRealizacji
-                              ] || undefined
-                            }
-                            hideControls
-                            onChange={(value: number) => {
-                              setMRPPlanowanePrzyjecia(
-                                (mrpPlanowanePrzyjecia) => {
-                                  const tempGHP = mrpPlanowanePrzyjecia;
-                                  tempGHP[
-                                    index2 + ghpVariables.czasRealizacji
-                                  ] = value;
-
-                                  setX(
-                                    getX(
-                                      GHP,
-                                      MRPPlanowanePrzyjecia,
-                                      mrpVariables,
-                                      ghpVariables
-                                    )
-                                  );
-                                  return tempGHP;
-                                }
-                              );
-                            }}
-                          />
-                        </td>
-                      )
-                    )}
-                  </tr>
-                )
-              )}
-            </tbody>
-          </Table>
-        </div>
-        <NumberInput
-          label="Czas realizacji"
-          min={0}
-          value={mrpVariables.czasRealizacji}
-          onChange={(value: number) => {
-            setMrpVariables((mrpVariables) => ({
-              ...mrpVariables,
-              czasRealizacji: value || 0,
-            }));
-          }}
-        />
-        <NumberInput
-          label="Na stanie"
-          min={0}
-          value={mrpVariables.naStanie}
-          onChange={(value: number) => {
-            setMrpVariables((mrpVariables) => ({
-              ...mrpVariables,
-              naStanie: value || 0,
-            }));
-          }}
-        />
-        <NumberInput
-          label="Wielkosc Partii"
-          min={0}
-          value={mrpVariables.wielkoscPartii}
-          onChange={(value: number) => {
-            setMrpVariables((mrpVariables) => ({
-              ...mrpVariables,
-              wielkoscPartii: value || 0,
-            }));
+        <MrpTable
+          ghpVariables={ghpVariables}
+          inputRow={MRPPlanowanePrzyjecia}
+          table={x}
+          setTableData={updateRama}
+          variablesState={{
+            state: mrpVariables,
+            setState: setMrpVariables,
           }}
         />
         <Space h="md" />
         <Title order={2}>Nogi (4)</Title>
-        <div style={{ display: "flex" }}>
-          <Table style={{ marginTop: 16, marginBottom: 16, maxWidth: 250 }}>
-            <tbody>
-              <tr>
-                <td>Dane produkcyjne / Okres</td>
-              </tr>
-              <tr>
-                <td style={{ height: 51 }}>Całkowite zapotrzebowanie</td>
-              </tr>
-              <tr>
-                <td style={{ height: 51 }}>Planowanie przyjecia</td>
-              </tr>
-              <tr>
-                <td style={{ height: 51 }}>Przewidywane na stanie</td>
-              </tr>
-              <tr>
-                <td style={{ height: 51 }}>Zapotrzeboawnie netto</td>
-              </tr>
-              <tr>
-                <td style={{ height: 51 }}>Planowanie zamowienia</td>
-              </tr>
-              <tr>
-                <td style={{ height: 51 }}>Planowane przyjecie zamowien</td>
-              </tr>
-            </tbody>
-          </Table>
-          <Table my="md">
-            <thead>
-              <tr>
-                {MRPNogiPlanowanePrzyjecia.slice(
-                  ghpVariables.czasRealizacji
-                ).map((v, i) => (
-                  <th style={{ textAlign: "center", fontWeight: "normal" }}>
-                    {i + 1}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {transpose(nogiX.slice(ghpVariables.czasRealizacji))?.map(
-                (row, index1) => (
-                  <tr key={index1} style={{ height: 51 }}>
-                    {row.map((col, index2) =>
-                      index1 !== Mrp.PLANOWANE_PRZYJECIA ? (
-                        <td style={{ height: 50.5, textAlign: "center" }}>
-                          {col}
-                        </td>
-                      ) : (
-                        <td>
-                          <NumberInput
-                            value={
-                              MRPNogiPlanowanePrzyjecia[
-                                index2 + ghpVariables.czasRealizacji
-                              ] || undefined
-                            }
-                            hideControls
-                            onChange={(value: number) => {
-                              setMRPNogiPlanowanePrzyjecia(
-                                (mrpPlanowanePrzyjecia) => {
-                                  const tempGHP = mrpPlanowanePrzyjecia;
-                                  tempGHP[
-                                    index2 + ghpVariables.czasRealizacji
-                                  ] = value;
-                                  const newGhp = GHP.map((v, i) =>
-                                    i === 1 ? v.map((w) => w * 4) : v
-                                  );
-                                  setNogiX(
-                                    getX(
-                                      newGhp,
-                                      MRPNogiPlanowanePrzyjecia,
-                                      mrpNogiVariables,
-                                      ghpVariables
-                                    )
-                                  );
-
-                                  return tempGHP;
-                                }
-                              );
-                            }}
-                          />
-                        </td>
-                      )
-                    )}
-                  </tr>
-                )
-              )}
-            </tbody>
-          </Table>
-        </div>
-        <NumberInput
-          label="Czas realizacji"
-          min={0}
-          value={mrpNogiVariables.czasRealizacji}
-          onChange={(value: number) => {
-            setMrpNogiVariables((mrpVariables) => ({
-              ...mrpVariables,
-              czasRealizacji: value || 0,
-            }));
-          }}
-        />
-        <NumberInput
-          label="Na stanie"
-          min={0}
-          value={mrpNogiVariables.naStanie}
-          onChange={(value: number) => {
-            setMrpNogiVariables((mrpVariables) => ({
-              ...mrpVariables,
-              naStanie: value || 0,
-            }));
-          }}
-        />
-        <NumberInput
-          label="Wielkosc Partii"
-          min={0}
-          value={mrpNogiVariables.wielkoscPartii}
-          onChange={(value: number) => {
-            setMrpNogiVariables((mrpVariables) => ({
-              ...mrpVariables,
-              wielkoscPartii: value || 0,
-            }));
+        <MrpTable
+          ghpVariables={ghpVariables}
+          inputRow={MRPNogiPlanowanePrzyjecia}
+          table={nogiX}
+          setTableData={updateNogi}
+          variablesState={{
+            state: mrpNogiVariables,
+            setState: setMrpNogiVariables,
           }}
         />
         <Space h="md" />
         <Title order={2}>Stelaż</Title>
-        <div style={{ display: "flex" }}>
-          <Table style={{ marginTop: 16, marginBottom: 16, maxWidth: 250 }}>
-            <tbody>
-              <tr>
-                <td>Dane produkcyjne / Okres</td>
-              </tr>
-              <tr>
-                <td style={{ height: 51 }}>Całkowite zapotrzebowanie</td>
-              </tr>
-              <tr>
-                <td style={{ height: 51 }}>Planowanie przyjecia</td>
-              </tr>
-              <tr>
-                <td style={{ height: 51 }}>Przewidywane na stanie</td>
-              </tr>
-              <tr>
-                <td style={{ height: 51 }}>Zapotrzeboawnie netto</td>
-              </tr>
-              <tr>
-                <td style={{ height: 51 }}>Planowanie zamowienia</td>
-              </tr>
-              <tr>
-                <td style={{ height: 51 }}>Planowane przyjecie zamowien</td>
-              </tr>
-            </tbody>
-          </Table>
-          <Table my="md">
-            <thead>
-              <tr>
-                {BOM2StelazPlanowanePrzyjecia.slice(
-                  ghpVariables.czasRealizacji
-                ).map((v, i) => (
-                  <th style={{ textAlign: "center", fontWeight: "normal" }}>
-                    {i + 1}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {transpose(x2.slice(ghpVariables.czasRealizacji))?.map(
-                (row, index1) => (
-                  <tr key={index1} style={{ height: 51 }}>
-                    {row.map((col, index2) =>
-                      index1 !== Mrp.PLANOWANE_PRZYJECIA ? (
-                        <td style={{ height: 50.5, textAlign: "center" }}>
-                          {col}
-                        </td>
-                      ) : (
-                        <td>
-                          <NumberInput
-                            value={
-                              BOM2StelazPlanowanePrzyjecia[
-                                index2 + ghpVariables.czasRealizacji
-                              ] || undefined
-                            }
-                            hideControls
-                            onChange={(value: number) => {
-                              setBOM2StelazPlanowanePrzyjecia(
-                                (mrpPlanowanePrzyjecia) => {
-                                  const tempGHP = mrpPlanowanePrzyjecia;
-                                  tempGHP[
-                                    index2 + ghpVariables.czasRealizacji
-                                  ] = value;
-                                  const fakeGHP = Array.from(Array(1), () =>
-                                    new Array(10).fill(undefined)
-                                  );
-                                  fakeGHP[Ghp.PRODUKCJA] = transpose(x)[4];
-                                  setX2(
-                                    getX(
-                                      fakeGHP,
-                                      tempGHP,
-                                      bom2StelazVariables,
-                                      ghpVariables
-                                    )
-                                  );
-                                  return tempGHP;
-                                }
-                              );
-                            }}
-                          />
-                        </td>
-                      )
-                    )}
-                  </tr>
-                )
-              )}
-            </tbody>
-          </Table>
-        </div>
-        <NumberInput
-          label="Czas realizacji"
-          min={0}
-          value={bom2StelazVariables.czasRealizacji}
-          onChange={(value: number) => {
-            setbom2StelazVariables((mrpVariables) => ({
-              ...mrpVariables,
-              czasRealizacji: value || 0,
-            }));
-          }}
-        />
-        <NumberInput
-          label="Na stanie"
-          min={0}
-          value={bom2StelazVariables.naStanie}
-          onChange={(value: number) => {
-            setbom2StelazVariables((mrpVariables) => ({
-              ...mrpVariables,
-              naStanie: value || 0,
-            }));
-          }}
-        />
-        <NumberInput
-          label="Wielkosc Partii"
-          min={0}
-          value={bom2StelazVariables.wielkoscPartii}
-          onChange={(value: number) => {
-            setbom2StelazVariables((mrpVariables) => ({
-              ...mrpVariables,
-              wielkoscPartii: value || 0,
-            }));
+        <MrpTable
+          ghpVariables={ghpVariables}
+          inputRow={BOM2StelazPlanowanePrzyjecia}
+          table={x2}
+          setTableData={updateStelaz}
+          variablesState={{
+            state: bom2StelazVariables,
+            setState: setbom2StelazVariables,
           }}
         />
       </ScrollArea>
