@@ -36,7 +36,7 @@ const App = () => {
   const [NogiVariables, setNogiVariables] = useSetState({
     czasRealizacji: 2,
     naStanie: 40,
-    poziomBOM: 2,
+    poziomBOM: 1,
     wielkoscPartii: 120,
   });
 
