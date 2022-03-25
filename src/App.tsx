@@ -18,6 +18,9 @@ const App = () => {
   const [StelazPlanowanePrzyjecia, setStelazPlanowanePrzyjecia] =
     React.useState<number[]>([0, 30, 0, 0, 0, 0, 0, 0, 0, 0]);
 
+  const [ZaglowekPlanowanePrzyjecia, setZaglowekPlanowanePrzyjecia] =
+    React.useState<number[]>([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+
   const [ghpVariables, setGhpVariables] = useSetState({
     czasRealizacji: 1,
     naStanie: 2,
@@ -38,6 +41,13 @@ const App = () => {
   });
 
   const [StelazVariables, setStelazVariables] = useSetState({
+    czasRealizacji: 1,
+    naStanie: 10,
+    poziomBOM: 2,
+    wielkoscPartii: 10,
+  });
+
+  const [ZaglowekVariables, setZaglowekVariables] = useSetState({
     czasRealizacji: 1,
     naStanie: 10,
     poziomBOM: 2,
@@ -78,6 +88,17 @@ const App = () => {
     );
   });
 
+  const [zaglowek, setZaglowek] = React.useState<number[][]>(() => {
+    const fakeGHP = Array.from(Array(1), () => new Array(10).fill(undefined));
+    fakeGHP[Ghp.PRODUKCJA] = transpose(rama)[4];
+    return mrpAlgorithm(
+      fakeGHP,
+      ZaglowekPlanowanePrzyjecia,
+      ZaglowekVariables,
+      ghpVariables
+    );
+  });
+
   useEffect(
     () =>
       setRama(
@@ -111,6 +132,19 @@ const App = () => {
     );
   }, [StelazVariables, ramaVariables, rama]);
 
+  useEffect(() => {
+    const fakeGHP = Array.from(Array(1), () => new Array(10).fill(undefined));
+    fakeGHP[Ghp.PRODUKCJA] = transpose(rama)[4];
+    setZaglowek(
+      mrpAlgorithm(
+        fakeGHP,
+        ZaglowekPlanowanePrzyjecia,
+        ZaglowekVariables,
+        ghpVariables
+      )
+    );
+  }, [ZaglowekVariables, ramaVariables, rama]);
+
   const updateStelaz = (value: number, index: number) =>
     setStelazPlanowanePrzyjecia((RamaPlanowanePrzyjecia) => {
       const tempGHP = RamaPlanowanePrzyjecia;
@@ -118,6 +152,18 @@ const App = () => {
       const fakeGHP = Array.from(Array(1), () => new Array(10).fill(undefined));
       fakeGHP[Ghp.PRODUKCJA] = transpose(rama)[4];
       setStelaz(mrpAlgorithm(fakeGHP, tempGHP, StelazVariables, ghpVariables));
+      return tempGHP;
+    });
+
+  const updateZaglowek = (value: number, index: number) =>
+    setZaglowekPlanowanePrzyjecia((RamaPlanowanePrzyjecia) => {
+      const tempGHP = RamaPlanowanePrzyjecia;
+      tempGHP[index + ghpVariables.czasRealizacji] = value;
+      const fakeGHP = Array.from(Array(1), () => new Array(10).fill(undefined));
+      fakeGHP[Ghp.PRODUKCJA] = transpose(rama)[4];
+      setZaglowek(
+        mrpAlgorithm(fakeGHP, tempGHP, ZaglowekVariables, ghpVariables)
+      );
       return tempGHP;
     });
 
@@ -205,6 +251,18 @@ const App = () => {
         variablesState={{
           state: StelazVariables,
           setState: setStelazVariables,
+        }}
+      />
+      <Space h="md" />
+      <Title order={2}>Zagłówek</Title>
+      <MrpTable
+        ghpVariables={ghpVariables}
+        inputRow={ZaglowekPlanowanePrzyjecia}
+        table={zaglowek}
+        setTableData={updateZaglowek}
+        variablesState={{
+          state: ZaglowekVariables,
+          setState: setZaglowekVariables,
         }}
       />
     </ScrollArea>
