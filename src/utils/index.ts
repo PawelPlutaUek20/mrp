@@ -45,12 +45,12 @@ export const mrpAlgorithm = (
             (acc[index - 1]
               ? (acc[index - 1][Mrp.PRZEWIDYWANE_NA_STANIE] || 0) +
                 (mrpPlanowanePrzyjecia[index] || 0)
-              : mrpVariables.naStanie + (mrpPlanowanePrzyjecia[index] || 0)) <
-              0 &&
-              -(acc[index - 1]
-                ? (acc[index - 1][Mrp.PRZEWIDYWANE_NA_STANIE] || 0) +
-                  (mrpPlanowanePrzyjecia[index] || 0)
-                : mrpVariables.naStanie + (mrpPlanowanePrzyjecia[index] || 0)),
+              : mrpVariables.naStanie + (mrpPlanowanePrzyjecia[index] || 0)) < 0
+              ? -(acc[index - 1]
+                  ? (acc[index - 1][Mrp.PRZEWIDYWANE_NA_STANIE] || 0) +
+                    (mrpPlanowanePrzyjecia[index] || 0)
+                  : mrpVariables.naStanie + (mrpPlanowanePrzyjecia[index] || 0))
+              : undefined,
             undefined,
             undefined,
           ],
@@ -91,14 +91,15 @@ export const mrpAlgorithm = (
               : mrpVariables.naStanie) -
               (val[Ghp.PRODUKCJA] || 0) +
               (mrpPlanowanePrzyjecia[index] || 0) <
-              0 &&
-              -(
-                (index - 1 >= 0
-                  ? acc[index - 1][Mrp.PRZEWIDYWANE_NA_STANIE] || 0
-                  : mrpVariables.naStanie) -
-                (val[Ghp.PRODUKCJA] || 0) +
-                (mrpPlanowanePrzyjecia[index] || 0)
-              ),
+            0
+              ? -(
+                  (index - 1 >= 0
+                    ? acc[index - 1][Mrp.PRZEWIDYWANE_NA_STANIE] || 0
+                    : mrpVariables.naStanie) -
+                  (val[Ghp.PRODUKCJA] || 0) +
+                  (mrpPlanowanePrzyjecia[index] || 0)
+                )
+              : undefined,
             undefined,
             undefined,
           ],
