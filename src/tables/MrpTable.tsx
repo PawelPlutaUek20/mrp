@@ -30,7 +30,7 @@ export const MrpTable: React.FC<Props> = ({
 }) => {
   return (
     <>
-      <div style={{ display: "flex" }}>
+      <div style={{ display: "flex", minWidth: 1100 }}>
         <Table my="md" style={{ maxWidth: "20em" }}>
           <tbody>
             <tr>
@@ -43,8 +43,8 @@ export const MrpTable: React.FC<Props> = ({
                 />
               </td>
             </tr>
-            {mrpRows.map((title) => (
-              <tr>
+            {mrpRows.map((title, i) => (
+              <tr key={i}>
                 <td>
                   <TextInput
                     size="lg"
@@ -61,7 +61,10 @@ export const MrpTable: React.FC<Props> = ({
           <thead>
             <tr>
               {inputRow.slice(ghpVariables.czasRealizacji).map((v, i) => (
-                <th style={{ textAlign: "center", fontWeight: "normal" }}>
+                <th
+                  key={i}
+                  style={{ textAlign: "center", fontWeight: "normal" }}
+                >
                   <TextInput
                     size="lg"
                     readOnly
@@ -83,7 +86,7 @@ export const MrpTable: React.FC<Props> = ({
                 <tr key={index1}>
                   {row.map((col, index2) =>
                     index1 !== Mrp.PLANOWANE_PRZYJECIA ? (
-                      <td>
+                      <td key={index2}>
                         <NumberInput
                           size="lg"
                           readOnly
@@ -97,7 +100,7 @@ export const MrpTable: React.FC<Props> = ({
                         />
                       </td>
                     ) : (
-                      <td>
+                      <td key={index2}>
                         <NumberInput
                           size="lg"
                           value={
@@ -120,6 +123,7 @@ export const MrpTable: React.FC<Props> = ({
       </div>
       {Object.entries(state).map(([variableKey, variableValue], index) => (
         <NumberInput
+          key={index}
           size="lg"
           disabled={index === 3}
           label={variableKey}

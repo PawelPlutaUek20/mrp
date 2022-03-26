@@ -19,7 +19,7 @@ export const GhpTable: React.FC<Props> = ({
 }) => {
   return (
     <>
-      <div style={{ display: "flex" }}>
+      <div style={{ display: "flex", minWidth: 1100 }}>
         <Table my="md" style={{ maxWidth: "20em" }}>
           <tbody>
             <tr>
@@ -32,8 +32,8 @@ export const GhpTable: React.FC<Props> = ({
                 />
               </td>
             </tr>
-            {ghpRows.map((row) => (
-              <tr>
+            {ghpRows.map((row, i) => (
+              <tr key={i}>
                 <td>
                   <TextInput
                     size="lg"
@@ -52,7 +52,7 @@ export const GhpTable: React.FC<Props> = ({
               {Array(10)
                 .fill(undefined)
                 .map((v, i) => (
-                  <th>
+                  <th key={i}>
                     <TextInput
                       size="lg"
                       readOnly
@@ -70,19 +70,24 @@ export const GhpTable: React.FC<Props> = ({
           </thead>
           <tbody>
             {table.map((row, index1) => (
-              <tr style={{ height: 51 }} key={index1}>
+              <tr key={index1}>
                 {row.map((col, index2) =>
                   index1 === Ghp.DOSTEPNE ? (
-                    <td>
+                    <td key={index2}>
                       <NumberInput
                         size="lg"
                         readOnly
                         variant="unstyled"
                         value={col}
+                        styles={{
+                          input: {
+                            textAlign: "center",
+                          },
+                        }}
                       />
                     </td>
                   ) : (
-                    <td>
+                    <td key={index2}>
                       <NumberInput
                         size="lg"
                         value={col || undefined}
@@ -99,8 +104,9 @@ export const GhpTable: React.FC<Props> = ({
           </tbody>
         </Table>
       </div>
-      {Object.entries(state).map(([variableKey, variableValue]) => (
+      {Object.entries(state).map(([variableKey, variableValue], i) => (
         <NumberInput
+          key={i}
           size="lg"
           label={variableKey}
           min={0}
