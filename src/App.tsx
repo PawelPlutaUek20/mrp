@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 
 import { ScrollArea, Title, Space } from "@mantine/core";
 import { useSetState } from "@mantine/hooks";
@@ -145,64 +145,85 @@ const App = () => {
     );
   }, [ZaglowekVariables, ramaVariables, rama]);
 
-  const updateStelaz = (value: number, index: number) =>
-    setStelazPlanowanePrzyjecia((RamaPlanowanePrzyjecia) => {
-      const tempGHP = RamaPlanowanePrzyjecia;
-      tempGHP[index + ghpVariables.czasRealizacji] = value;
-      const fakeGHP = Array.from(Array(1), () => new Array(10).fill(undefined));
-      fakeGHP[Ghp.PRODUKCJA] = transpose(rama)[4];
-      setStelaz(mrpAlgorithm(fakeGHP, tempGHP, StelazVariables, ghpVariables));
-      return tempGHP;
-    });
+  const updateStelaz = useCallback(
+    (value: number, index: number) =>
+      setStelazPlanowanePrzyjecia((RamaPlanowanePrzyjecia) => {
+        const tempGHP = RamaPlanowanePrzyjecia;
+        tempGHP[index + ghpVariables.czasRealizacji] = value;
+        const fakeGHP = Array.from(Array(1), () =>
+          new Array(10).fill(undefined)
+        );
+        fakeGHP[Ghp.PRODUKCJA] = transpose(rama)[4];
+        setStelaz(
+          mrpAlgorithm(fakeGHP, tempGHP, StelazVariables, ghpVariables)
+        );
+        return tempGHP;
+      }),
+    [setStelaz, setStelazPlanowanePrzyjecia]
+  );
 
-  const updateZaglowek = (value: number, index: number) =>
-    setZaglowekPlanowanePrzyjecia((RamaPlanowanePrzyjecia) => {
-      const tempGHP = RamaPlanowanePrzyjecia;
-      tempGHP[index + ghpVariables.czasRealizacji] = value;
-      const fakeGHP = Array.from(Array(1), () => new Array(10).fill(undefined));
-      fakeGHP[Ghp.PRODUKCJA] = transpose(rama)[4];
-      setZaglowek(
-        mrpAlgorithm(fakeGHP, tempGHP, ZaglowekVariables, ghpVariables)
-      );
-      return tempGHP;
-    });
+  const updateZaglowek = useCallback(
+    (value: number, index: number) =>
+      setZaglowekPlanowanePrzyjecia((RamaPlanowanePrzyjecia) => {
+        const tempGHP = RamaPlanowanePrzyjecia;
+        tempGHP[index + ghpVariables.czasRealizacji] = value;
+        const fakeGHP = Array.from(Array(1), () =>
+          new Array(10).fill(undefined)
+        );
+        fakeGHP[Ghp.PRODUKCJA] = transpose(rama)[4];
+        setZaglowek(
+          mrpAlgorithm(fakeGHP, tempGHP, ZaglowekVariables, ghpVariables)
+        );
+        return tempGHP;
+      }),
+    [setZaglowek, setZaglowekPlanowanePrzyjecia]
+  );
 
-  const updateNogi = (value: number, index: number) =>
-    setNogiPlanowanePrzyjecia((RamaPlanowanePrzyjecia) => {
-      const tempGHP = RamaPlanowanePrzyjecia;
-      tempGHP[index + ghpVariables.czasRealizacji] = value;
-      const newGhp = ghp.map((v, i) => (i === 1 ? v.map((w) => w * 4) : v));
-      setNogi(
-        mrpAlgorithm(
-          newGhp,
-          NogiPlanowanePrzyjecia,
-          NogiVariables,
-          ghpVariables
-        )
-      );
+  const updateNogi = useCallback(
+    (value: number, index: number) =>
+      setNogiPlanowanePrzyjecia((RamaPlanowanePrzyjecia) => {
+        const tempGHP = RamaPlanowanePrzyjecia;
+        tempGHP[index + ghpVariables.czasRealizacji] = value;
+        const newGhp = ghp.map((v, i) => (i === 1 ? v.map((w) => w * 4) : v));
+        setNogi(
+          mrpAlgorithm(
+            newGhp,
+            NogiPlanowanePrzyjecia,
+            NogiVariables,
+            ghpVariables
+          )
+        );
 
-      return tempGHP;
-    });
+        return tempGHP;
+      }),
+    [setNogi, setNogiPlanowanePrzyjecia]
+  );
 
-  const updateRama = (value: number, index: number) => {
-    setRamaPlanowanePrzyjecia((RamaPlanowanePrzyjecia) => {
-      const tempGHP = RamaPlanowanePrzyjecia;
-      tempGHP[index + ghpVariables.czasRealizacji] = value;
+  const updateRama = useCallback(
+    (value: number, index: number) => {
+      setRamaPlanowanePrzyjecia((RamaPlanowanePrzyjecia) => {
+        const tempGHP = RamaPlanowanePrzyjecia;
+        tempGHP[index + ghpVariables.czasRealizacji] = value;
 
-      setRama(
-        mrpAlgorithm(ghp, RamaPlanowanePrzyjecia, ramaVariables, ghpVariables)
-      );
-      return tempGHP;
-    });
-  };
+        setRama(
+          mrpAlgorithm(ghp, RamaPlanowanePrzyjecia, ramaVariables, ghpVariables)
+        );
+        return tempGHP;
+      });
+    },
+    [setRama, setRamaPlanowanePrzyjecia]
+  );
 
-  const updateGhp = (value: number, index1: number, index2: number) => {
-    setGhp((ghp) => {
-      const tempGHP = ghp;
-      tempGHP[index1][index2] = value;
-      return ghpAlgorithm(tempGHP, ghpVariables);
-    });
-  };
+  const updateGhp = useCallback(
+    (value: number, index1: number, index2: number) => {
+      setGhp((ghp) => {
+        const tempGHP = ghp;
+        tempGHP[index1][index2] = value;
+        return ghpAlgorithm(tempGHP, ghpVariables);
+      });
+    },
+    [setGhp]
+  );
 
   return (
     <ScrollArea p="md" style={{ height: "100%" }}>
