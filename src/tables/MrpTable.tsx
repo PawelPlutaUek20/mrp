@@ -121,7 +121,7 @@ export const MrpTable: React.FC<Props> = ({
       {Object.entries(state).map(([variableKey, variableValue], index) => (
         <NumberInput
           size="lg"
-          disabled={index === 2}
+          disabled={index === 3}
           label={variableKey}
           min={0}
           value={variableValue as number | undefined}
