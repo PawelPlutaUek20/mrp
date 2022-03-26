@@ -29,29 +29,29 @@ const App = () => {
   const [ramaVariables, setRamaVariables] = useSetState({
     czasRealizacji: 3,
     naStanie: 22,
-    poziomBOM: 1,
     wielkoscPartii: 40,
+    poziomBOM: 1,
   });
 
   const [NogiVariables, setNogiVariables] = useSetState({
     czasRealizacji: 2,
     naStanie: 40,
-    poziomBOM: 1,
     wielkoscPartii: 120,
+    poziomBOM: 1,
   });
 
   const [StelazVariables, setStelazVariables] = useSetState({
     czasRealizacji: 1,
     naStanie: 10,
-    poziomBOM: 2,
     wielkoscPartii: 10,
+    poziomBOM: 2,
   });
 
   const [ZaglowekVariables, setZaglowekVariables] = useSetState({
     czasRealizacji: 1,
     naStanie: 10,
-    poziomBOM: 2,
     wielkoscPartii: 10,
+    poziomBOM: 2,
   });
 
   const [ghp, setGhp] = React.useState<number[][]>(() => {
@@ -206,7 +206,7 @@ const App = () => {
 
   return (
     <ScrollArea p="md" style={{ height: "100%" }}>
-      <Title order={1}>ghp</Title>
+      <Title order={1}>GHP</Title>
       <GhpTable
         table={ghp}
         setTableData={updateGhp}
@@ -218,18 +218,6 @@ const App = () => {
       <Space h="xl" />
       <Title order={1}>MRP</Title>
       <Space h="md" />
-      <Title order={2}>Rama</Title>
-      <MrpTable
-        ghpVariables={ghpVariables}
-        inputRow={RamaPlanowanePrzyjecia}
-        table={rama}
-        setTableData={updateRama}
-        variablesState={{
-          state: ramaVariables,
-          setState: setRamaVariables,
-        }}
-      />
-      <Space h="md" />
       <Title order={2}>Nogi (4)</Title>
       <MrpTable
         ghpVariables={ghpVariables}
@@ -239,6 +227,18 @@ const App = () => {
         variablesState={{
           state: NogiVariables,
           setState: setNogiVariables,
+        }}
+      />
+      <Space h="md" />
+      <Title order={2}>Rama</Title>
+      <MrpTable
+        ghpVariables={ghpVariables}
+        inputRow={RamaPlanowanePrzyjecia}
+        table={rama}
+        setTableData={updateRama}
+        variablesState={{
+          state: ramaVariables,
+          setState: setRamaVariables,
         }}
       />
       <Space h="md" />

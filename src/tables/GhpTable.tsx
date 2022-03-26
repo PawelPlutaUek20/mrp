@@ -1,4 +1,4 @@
-import { NumberInput, Table } from "@mantine/core";
+import { NumberInput, Table, TextInput } from "@mantine/core";
 import { Ghp } from "../utils";
 
 const ghpRows = ["Przewidywany popyt", "Produkcja", "Dostepne"];
@@ -20,14 +20,28 @@ export const GhpTable: React.FC<Props> = ({
   return (
     <>
       <div style={{ display: "flex" }}>
-        <Table style={{ marginTop: 16, marginBottom: 16, maxWidth: 200 }}>
+        <Table my="md" style={{ maxWidth: "20em" }}>
           <tbody>
             <tr>
-              <td>tydzien:</td>
+              <td>
+                <TextInput
+                  size="lg"
+                  readOnly
+                  variant="unstyled"
+                  value={"tydzien:"}
+                />
+              </td>
             </tr>
             {ghpRows.map((row) => (
               <tr>
-                <td style={{ height: 51 }}>{row}</td>
+                <td>
+                  <TextInput
+                    size="lg"
+                    readOnly
+                    variant="unstyled"
+                    value={row}
+                  />
+                </td>
               </tr>
             ))}
           </tbody>
@@ -38,8 +52,18 @@ export const GhpTable: React.FC<Props> = ({
               {Array(10)
                 .fill(undefined)
                 .map((v, i) => (
-                  <th style={{ textAlign: "center", fontWeight: "normal" }}>
-                    {i + 1}
+                  <th>
+                    <TextInput
+                      size="lg"
+                      readOnly
+                      variant="unstyled"
+                      value={i + 1}
+                      styles={{
+                        input: {
+                          textAlign: "center",
+                        },
+                      }}
+                    />
                   </th>
                 ))}
             </tr>
@@ -49,10 +73,18 @@ export const GhpTable: React.FC<Props> = ({
               <tr style={{ height: 51 }} key={index1}>
                 {row.map((col, index2) =>
                   index1 === Ghp.DOSTEPNE ? (
-                    <td style={{ height: 50.5, textAlign: "center" }}>{col}</td>
+                    <td>
+                      <NumberInput
+                        size="lg"
+                        readOnly
+                        variant="unstyled"
+                        value={col}
+                      />
+                    </td>
                   ) : (
                     <td>
                       <NumberInput
+                        size="lg"
                         value={col || undefined}
                         hideControls
                         onChange={(value: number) => {
@@ -69,6 +101,7 @@ export const GhpTable: React.FC<Props> = ({
       </div>
       {Object.entries(state).map(([variableKey, variableValue]) => (
         <NumberInput
+          size="lg"
           label={variableKey}
           min={0}
           value={variableValue as number | undefined}

@@ -1,4 +1,4 @@
-import { NumberInput, Table } from "@mantine/core";
+import { TextInput, NumberInput, Table } from "@mantine/core";
 import { Mrp, transpose } from "../utils";
 
 type Props = {
@@ -31,14 +31,28 @@ export const MrpTable: React.FC<Props> = ({
   return (
     <>
       <div style={{ display: "flex" }}>
-        <Table style={{ marginTop: 16, marginBottom: 16, maxWidth: 250 }}>
+        <Table my="md" style={{ maxWidth: "20em" }}>
           <tbody>
             <tr>
-              <td>Dane produkcyjne / Okres</td>
+              <td>
+                <TextInput
+                  size="lg"
+                  readOnly
+                  variant="unstyled"
+                  value={"Dane produkcyjne / Okres"}
+                />
+              </td>
             </tr>
             {mrpRows.map((title) => (
               <tr>
-                <td style={{ height: 51 }}>{title}</td>
+                <td>
+                  <TextInput
+                    size="lg"
+                    readOnly
+                    variant="unstyled"
+                    value={title}
+                  />
+                </td>
               </tr>
             ))}
           </tbody>
@@ -48,7 +62,17 @@ export const MrpTable: React.FC<Props> = ({
             <tr>
               {inputRow.slice(ghpVariables.czasRealizacji).map((v, i) => (
                 <th style={{ textAlign: "center", fontWeight: "normal" }}>
-                  {i + 1}
+                  <TextInput
+                    size="lg"
+                    readOnly
+                    variant="unstyled"
+                    value={i + 1}
+                    styles={{
+                      input: {
+                        textAlign: "center",
+                      },
+                    }}
+                  />
                 </th>
               ))}
             </tr>
@@ -56,15 +80,26 @@ export const MrpTable: React.FC<Props> = ({
           <tbody>
             {transpose(table.slice(ghpVariables.czasRealizacji))?.map(
               (row, index1) => (
-                <tr key={index1} style={{ height: 51 }}>
+                <tr key={index1}>
                   {row.map((col, index2) =>
                     index1 !== Mrp.PLANOWANE_PRZYJECIA ? (
-                      <td style={{ height: 50.5, textAlign: "center" }}>
-                        {col}
+                      <td>
+                        <NumberInput
+                          size="lg"
+                          readOnly
+                          variant="unstyled"
+                          value={col}
+                          styles={{
+                            input: {
+                              textAlign: "center",
+                            },
+                          }}
+                        />
                       </td>
                     ) : (
                       <td>
                         <NumberInput
+                          size="lg"
                           value={
                             inputRow[index2 + ghpVariables.czasRealizacji] ||
                             undefined
@@ -85,6 +120,7 @@ export const MrpTable: React.FC<Props> = ({
       </div>
       {Object.entries(state).map(([variableKey, variableValue], index) => (
         <NumberInput
+          size="lg"
           disabled={index === 2}
           label={variableKey}
           min={0}
