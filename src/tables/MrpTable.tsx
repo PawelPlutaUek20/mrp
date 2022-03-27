@@ -43,6 +43,7 @@ export const MrpTable: React.FC<Props> = React.memo(
                     readOnly
                     variant="unstyled"
                     value={"Dane produkcyjne / Okres"}
+                    styles={{input:{color:"#4c6ef5", fontWeight:"bold"}}}
                   />
                 </td>
               </tr>
@@ -54,6 +55,7 @@ export const MrpTable: React.FC<Props> = React.memo(
                       readOnly
                       variant="unstyled"
                       value={title}
+                      styles={{input:{color:"#4c6ef5"}}}
                     />
                   </td>
                 </tr>
@@ -76,6 +78,10 @@ export const MrpTable: React.FC<Props> = React.memo(
                       styles={{
                         input: {
                           textAlign: "center",
+                          color: "#4c6ef5",
+                          backgroundColor: "rgba(237, 242, 255, 1)",
+                          borderRadius: "4px",
+                          fontWeight: "bold",
                         },
                       }}
                     />
