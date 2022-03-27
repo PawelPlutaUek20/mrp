@@ -1,191 +1,293 @@
-import React from "react";
-import {
-  library,
-  IconLookup,
-  IconDefinition,
-  findIconDefinition,
-} from "@fortawesome/fontawesome-svg-core";
-import { fas } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, { useCallback, useEffect } from "react";
 
-import {
-  AppShell,
-  Header,
-  MantineProvider,
-  Navbar,
-  ScrollArea,
-  Title,
-  Text,
-  MediaQuery,
-  Burger,
-  useMantineTheme,
-  Table,
-  NumberInput,
-} from "@mantine/core";
+import { ScrollArea, Title, Space } from "@mantine/core";
+import { useSetState } from "@mantine/hooks";
 
-import { NavbarContent } from "./NavbarContent";
-import { MyTable } from "./Table";
+import { mrpAlgorithm, ghpAlgorithm, Ghp, transpose } from "./utils";
+import { MrpTable, GhpTable } from "./tables";
 
-function transpose(matrix: any[][]) {
-  return matrix[0].map((col, i) => matrix.map((row) => row[i]));
-}
-
-const elements = [
-  { name: "Przewidywany popyt" },
-  { name: "Produkcja" },
-  { name: "Dostępne" },
-  { name: "Czas realizacji = Na stanie = " },
-];
-
-const elements2 = [
-  { name: "Całkowite zapotrzebowanie" },
-  { name: "Planowane przyjęcia" },
-  { name: "Przewidywane na stanie" },
-  { name: "Zapotrzebowanie netto" },
-  { name: "Planowane zamówienia" },
-  { name: "Planowane przyjęcie zamówień" },
-  { name: "Czas realizacji = Wielkość partii = Poziom BOM = Na stanie = " },
-];
-
-const tableLookup: IconLookup = { prefix: "fas", iconName: "chart-column" };
-const tableIconDefinition: IconDefinition = findIconDefinition(tableLookup);
-
-const bedLookup: IconLookup = { prefix: "fas", iconName: "bed" };
-const bedIconDefinition: IconDefinition = findIconDefinition(bedLookup);
 
 const App = () => {
-  const [opened, setOpened] = React.useState(false);
-  const theme = useMantineTheme();
+  const [RamaPlanowanePrzyjecia, setRamaPlanowanePrzyjecia] = React.useState<
+    number[]
+  >([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
 
-  const [GHP, setGHP] = React.useState([
-    [null, null, null, null, 20, null, 40, null, null, null],
-    [null, null, null, null, 28, null, 30, null, null, null],
-    [2, 2, 2, 2, 10, 10, 0, 0, 0, 0],
-  ]);
+  const [NogiPlanowanePrzyjecia, setNogiPlanowanePrzyjecia] = React.useState<
+    number[]
+  >([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
 
-  const naStanie = 22;
-  const wielkoscPartii = 40;
+  const [StelazPlanowanePrzyjecia, setStelazPlanowanePrzyjecia] =
+    React.useState<number[]>([0, 30, 0, 0, 0, 0, 0, 0, 0, 0]);
 
-  const getX = (ghp: any[][]): any[][] => {
-    return transpose(ghp).reduce((acc, val, index) => {
-      return !val[0] && !val[1]
-        ? [
-            ...acc,
-            [
-              null,
-              null,
-              acc[index - 1] ? acc[index - 1][2] : naStanie,
-              null,
-              null,
-              null,
-            ],
-          ]
-        : acc[index - 1][2] - val[1] < 0
-        ? [
-            ...acc,
-            [
-              val[1],
-              null,
-              wielkoscPartii - (val[1] - acc[index - 1][2]),
-              val[1] - acc[index - 1][2],
-              null,
-              wielkoscPartii,
-            ],
-          ]
-        : [
-            ...acc,
-            [val[1], null, acc[index - 1][2] - val[1], null, null, null],
-          ];
-    }, []);
-  };
+  const [ZaglowekPlanowanePrzyjecia, setZaglowekPlanowanePrzyjecia] =
+    React.useState<number[]>([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
 
-  const [x, setX] = React.useState<any[][]>(() => getX(GHP));
+  const [ghpVariables, setGhpVariables] = useSetState({
+    czasRealizacji: 1,
+    naStanie: 2,
+  });
+
+  const [ramaVariables, setRamaVariables] = useSetState({
+    czasRealizacji: 3,
+    naStanie: 22,
+    wielkoscPartii: 40,
+    poziomBOM: 1,
+  });
+
+  const [NogiVariables, setNogiVariables] = useSetState({
+    czasRealizacji: 2,
+    naStanie: 40,
+    wielkoscPartii: 120,
+    poziomBOM: 1,
+  });
+
+  const [StelazVariables, setStelazVariables] = useSetState({
+    czasRealizacji: 1,
+    naStanie: 10,
+    wielkoscPartii: 10,
+    poziomBOM: 2,
+  });
+
+  const [ZaglowekVariables, setZaglowekVariables] = useSetState({
+    czasRealizacji: 1,
+    naStanie: 10,
+    wielkoscPartii: 10,
+    poziomBOM: 2,
+  });
+
+  const [ghp, setGhp] = React.useState<number[][]>(() => {
+    const emptyArr = Array.from(Array(3), () => new Array(10).fill(undefined));
+    emptyArr[Ghp.PRZEWIDYWANY_POPTY][4] = 20;
+    emptyArr[Ghp.PRZEWIDYWANY_POPTY][6] = 40;
+    emptyArr[Ghp.PRODUKCJA][4] = 28;
+    emptyArr[Ghp.PRODUKCJA][6] = 30;
+    return ghpAlgorithm(emptyArr, ghpVariables);
+  });
+
+  const [rama, setRama] = React.useState<number[][]>(() =>
+    mrpAlgorithm(ghp, RamaPlanowanePrzyjecia, ramaVariables, ghpVariables)
+  );
+
+  const [nogi, setNogi] = React.useState<number[][]>(() => {
+    const newGhp = ghp.map((v, i) => (i === 1 ? v.map((w) => w * 4) : v));
+    return mrpAlgorithm(
+      newGhp,
+      NogiPlanowanePrzyjecia,
+      ramaVariables,
+      ghpVariables
+    );
+  });
+
+  const [stelaz, setStelaz] = React.useState<number[][]>(() => {
+    const fakeGHP = Array.from(Array(1), () => new Array(10).fill(undefined));
+    fakeGHP[Ghp.PRODUKCJA] = transpose(rama)[4];
+    return mrpAlgorithm(
+      fakeGHP,
+      StelazPlanowanePrzyjecia,
+      StelazVariables,
+      ghpVariables
+    );
+  });
+
+  const [zaglowek, setZaglowek] = React.useState<number[][]>(() => {
+    const fakeGHP = Array.from(Array(1), () => new Array(10).fill(undefined));
+    fakeGHP[Ghp.PRODUKCJA] = transpose(rama)[4];
+    return mrpAlgorithm(
+      fakeGHP,
+      ZaglowekPlanowanePrzyjecia,
+      ZaglowekVariables,
+      ghpVariables
+    );
+  });
+
+  useEffect(
+    () =>
+      setRama(
+        mrpAlgorithm(ghp, RamaPlanowanePrzyjecia, ramaVariables, ghpVariables)
+      ),
+    [ramaVariables, ghpVariables, ghp]
+  );
+
+  useEffect(
+    () => setGhp((ghp) => ghpAlgorithm(ghp, ghpVariables)),
+    [ghpVariables]
+  );
+
+  useEffect(() => {
+    const newGhp = ghp.map((v, i) => (i === 1 ? v.map((w) => w * 4) : v));
+    setNogi(
+      mrpAlgorithm(newGhp, NogiPlanowanePrzyjecia, NogiVariables, ghpVariables)
+    );
+  }, [NogiVariables, ghpVariables, ghp]);
+
+  useEffect(() => {
+    const fakeGHP = Array.from(Array(1), () => new Array(10).fill(undefined));
+    fakeGHP[Ghp.PRODUKCJA] = transpose(rama)[4];
+    setStelaz(
+      mrpAlgorithm(
+        fakeGHP,
+        StelazPlanowanePrzyjecia,
+        StelazVariables,
+        ghpVariables
+      )
+    );
+  }, [StelazVariables, ramaVariables, rama]);
+
+  useEffect(() => {
+    const fakeGHP = Array.from(Array(1), () => new Array(10).fill(undefined));
+    fakeGHP[Ghp.PRODUKCJA] = transpose(rama)[4];
+    setZaglowek(
+      mrpAlgorithm(
+        fakeGHP,
+        ZaglowekPlanowanePrzyjecia,
+        ZaglowekVariables,
+        ghpVariables
+      )
+    );
+  }, [ZaglowekVariables, ramaVariables, rama]);
+
+  const updateStelaz = useCallback(
+    (value: number, index: number) =>
+      setStelazPlanowanePrzyjecia((RamaPlanowanePrzyjecia) => {
+        const tempGHP = RamaPlanowanePrzyjecia;
+        tempGHP[index + ghpVariables.czasRealizacji] = value;
+        const fakeGHP = Array.from(Array(1), () =>
+          new Array(10).fill(undefined)
+        );
+        fakeGHP[Ghp.PRODUKCJA] = transpose(rama)[4];
+        setStelaz(
+          mrpAlgorithm(fakeGHP, tempGHP, StelazVariables, ghpVariables)
+        );
+        return tempGHP;
+      }),
+    [setStelaz, setStelazPlanowanePrzyjecia]
+  );
+
+  const updateZaglowek = useCallback(
+    (value: number, index: number) =>
+      setZaglowekPlanowanePrzyjecia((RamaPlanowanePrzyjecia) => {
+        const tempGHP = RamaPlanowanePrzyjecia;
+        tempGHP[index + ghpVariables.czasRealizacji] = value;
+        const fakeGHP = Array.from(Array(1), () =>
+          new Array(10).fill(undefined)
+        );
+        fakeGHP[Ghp.PRODUKCJA] = transpose(rama)[4];
+        setZaglowek(
+          mrpAlgorithm(fakeGHP, tempGHP, ZaglowekVariables, ghpVariables)
+        );
+        return tempGHP;
+      }),
+    [setZaglowek, setZaglowekPlanowanePrzyjecia]
+  );
+
+  const updateNogi = useCallback(
+    (value: number, index: number) =>
+      setNogiPlanowanePrzyjecia((RamaPlanowanePrzyjecia) => {
+        const tempGHP = RamaPlanowanePrzyjecia;
+        tempGHP[index + ghpVariables.czasRealizacji] = value;
+        const newGhp = ghp.map((v, i) => (i === 1 ? v.map((w) => w * 4) : v));
+        setNogi(
+          mrpAlgorithm(
+            newGhp,
+            NogiPlanowanePrzyjecia,
+            NogiVariables,
+            ghpVariables
+          )
+        );
+
+        return tempGHP;
+      }),
+    [setNogi, setNogiPlanowanePrzyjecia]
+  );
+
+  const updateRama = useCallback(
+    (value: number, index: number) => {
+      setRamaPlanowanePrzyjecia((RamaPlanowanePrzyjecia) => {
+        const tempGHP = RamaPlanowanePrzyjecia;
+        tempGHP[index + ghpVariables.czasRealizacji] = value;
+
+        setRama(
+          mrpAlgorithm(ghp, RamaPlanowanePrzyjecia, ramaVariables, ghpVariables)
+        );
+        return tempGHP;
+      });
+    },
+    [setRama, setRamaPlanowanePrzyjecia]
+  );
+
+  const updateGhp = useCallback(
+    (value: number, index1: number, index2: number) => {
+      setGhp((ghp) => {
+        const tempGHP = ghp;
+        tempGHP[index1][index2] = value;
+        return ghpAlgorithm(tempGHP, ghpVariables);
+      });
+    },
+    [setGhp]
+  );
 
   return (
-    <MantineProvider
-      withGlobalStyles
-      withNormalizeCSS
-      theme={{ colorScheme: "dark" }}
-    >
-      <AppShell
-        navbarOffsetBreakpoint="sm"
-        padding={0}
-        fixed
-        styles={(theme) => ({
-          main: {
-            backgroundColor:
-              theme.colorScheme === "dark"
-                ? theme.colors.dark[8]
-                : theme.colors.gray[0],
-            height: `100vh`,
-          },
-        })}
-        navbar={
-          <Navbar
-            p="md"
-            hiddenBreakpoint="sm"
-            hidden={!opened}
-            width={{ sm: 300, lg: 400 }}
-          >
-            <NavbarContent />
-          </Navbar>
-        }
-        header={
-          <Header height={70} p="md">
-            <div
-              style={{ display: "flex", alignItems: "center", height: "100%" }}
-            >
-              <MediaQuery largerThan="sm" styles={{ display: "none" }}>
-                <Burger
-                  opened={opened}
-                  onClick={() => setOpened((o) => !o)}
-                  size="sm"
-                  color={theme.colors.gray[6]}
-                  mr="xl"
-                />
-              </MediaQuery>
-
-              <Text>Algorytm MRP dla produkcji łóżek</Text>
-            </div>
-          </Header>
-        }
-      >
-        <ScrollArea p="md" style={{ height: "100%" }}>
-          <Title order={1}>GHP</Title>
-          <Table my="md">
-            <tbody>
-              {GHP.map((row, index1) => (
-                <tr key={index1}>
-                  {row.map((col, index2) =>
-                    index1 == 2 ? (
-                      <td>{col}</td>
-                    ) : (
-                      <td>
-                        <NumberInput
-                          value={col || undefined}
-                          hideControls
-                          onChange={(value: number) => {
-                            setGHP((ghp) => {
-                              const tempGHP = ghp;
-                              tempGHP[index1][index2] = value;
-
-                              setX(getX(ghp));
-                              return tempGHP;
-                            });
-                          }}
-                        />
-                      </td>
-                    )
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-          <Title order={1}>MRP</Title>
-          <MyTable elements={transpose(x)}></MyTable>
-        </ScrollArea>
-      </AppShell>
-    </MantineProvider>
+    <ScrollArea p="md" style={{ height: "100%" }}>
+      <Title order={1}>GHP</Title>
+      <GhpTable
+        table={ghp}
+        setTableData={updateGhp}
+        variablesState={{
+          state: ghpVariables,
+          setState: setGhpVariables,
+        }}
+      />
+      <Space h="xl" />
+      <Title order={1}>MRP</Title>
+      <Space h="md" />
+      <Title order={2}>Nogi (4)</Title>
+      <MrpTable
+        ghpVariables={ghpVariables}
+        inputRow={NogiPlanowanePrzyjecia}
+        table={nogi}
+        setTableData={updateNogi}
+        variablesState={{
+          state: NogiVariables,
+          setState: setNogiVariables,
+        }}
+      />
+      <Space h="md" />
+      <Title order={2}>Rama</Title>
+      <MrpTable
+        ghpVariables={ghpVariables}
+        inputRow={RamaPlanowanePrzyjecia}
+        table={rama}
+        setTableData={updateRama}
+        variablesState={{
+          state: ramaVariables,
+          setState: setRamaVariables,
+        }}
+      />
+      <Space h="md" />
+      <Title order={2}>Stelaż</Title>
+      <MrpTable
+        ghpVariables={ghpVariables}
+        inputRow={StelazPlanowanePrzyjecia}
+        table={stelaz}
+        setTableData={updateStelaz}
+        variablesState={{
+          state: StelazVariables,
+          setState: setStelazVariables,
+        }}
+      />
+      <Space h="md" />
+      <Title order={2}>Zagłówek</Title>
+      <MrpTable
+        ghpVariables={ghpVariables}
+        inputRow={ZaglowekPlanowanePrzyjecia}
+        table={zaglowek}
+        setTableData={updateZaglowek}
+        variablesState={{
+          state: ZaglowekVariables,
+          setState: setZaglowekVariables,
+        }}
+      />
+    </ScrollArea>
   );
 };
 
