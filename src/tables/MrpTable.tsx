@@ -128,7 +128,8 @@ export const MrpTable: React.FC<Props> = React.memo(
           <NumberInput
             key={index}
             size="lg"
-            disabled={index === 3}
+            readOnly={index === 3}
+            hideControls={index === 3}
             label={variableKey}
             min={0}
             value={variableValue as number | undefined}
