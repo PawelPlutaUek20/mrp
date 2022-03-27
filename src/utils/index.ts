@@ -19,7 +19,7 @@ export const transpose = (matrix: any[][]) => {
 
 export const mrpAlgorithm = (
   ghp: number[][],
-  mrpPlanowanePrzyjecia: number[],
+  mrpPlanowanePrzyjeciaTable: number[],
   mrpVariables: {
     czasRealizacji: number;
     naStanie: number;
@@ -31,6 +31,9 @@ export const mrpAlgorithm = (
     naStanie: number;
   }
 ): number[][] => {
+  const mrpPlanowanePrzyjecia = mrpPlanowanePrzyjeciaTable.slice(
+    ghpVariables.czasRealizacji
+  );
   const res = transpose(ghp).reduce((acc, val, index) => {
     return !val[Ghp.PRZEWIDYWANY_POPTY] && !val[Ghp.PRODUKCJA]
       ? [
