@@ -27,7 +27,10 @@ export const GhpTable: React.FC<Props> = React.memo(
                     size="lg"
                     readOnly
                     variant="unstyled"
-                    value={"tydzien:"}
+                    value={"Tydzien:"}
+                    styles={(theme) => ({
+                      input: { color: theme.colors.indigo, fontWeight: "bold" },
+                    })}
                   />
                 </td>
               </tr>
@@ -39,6 +42,9 @@ export const GhpTable: React.FC<Props> = React.memo(
                       readOnly
                       variant="unstyled"
                       value={row}
+                      styles={(theme) => ({
+                        input: { color: theme.colors.indigo },
+                      })}
                     />
                   </td>
                 </tr>
@@ -57,11 +63,15 @@ export const GhpTable: React.FC<Props> = React.memo(
                         readOnly
                         variant="unstyled"
                         value={i + 1}
-                        styles={{
+                        styles={(theme) => ({
                           input: {
                             textAlign: "center",
+                            color: theme.colors.indigo,
+                            backgroundColor: theme.colors.indigo[0],
+                            borderRadius: "4px",
+                            fontWeight: "bold",
                           },
-                        }}
+                        })}
                       />
                     </th>
                   ))}
