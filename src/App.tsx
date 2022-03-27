@@ -6,7 +6,6 @@ import { useSetState } from "@mantine/hooks";
 import { mrpAlgorithm, ghpAlgorithm, Ghp, transpose } from "./utils";
 import { MrpTable, GhpTable } from "./tables";
 
-
 const App = () => {
   const [RamaPlanowanePrzyjecia, setRamaPlanowanePrzyjecia] = React.useState<
     number[]
@@ -197,7 +196,7 @@ const App = () => {
 
         return tempGHP;
       }),
-    [setNogi, setNogiPlanowanePrzyjecia]
+    [setNogi, setNogiPlanowanePrzyjecia, setGhpVariables]
   );
 
   const updateRama = useCallback(
@@ -212,7 +211,7 @@ const App = () => {
         return tempGHP;
       });
     },
-    [setRama, setRamaPlanowanePrzyjecia]
+    [setRama, setRamaPlanowanePrzyjecia, setGhpVariables]
   );
 
   const updateGhp = useCallback(
