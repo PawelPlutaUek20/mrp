@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
-import { AppShell, Header, MantineProvider, Text, Badge} from "@mantine/core";
+import { AppShell, Header, MantineProvider, Badge } from "@mantine/core";
 
 import App from "./App";
 
@@ -29,7 +29,9 @@ ReactDOM.render(
             <div
               style={{ display: "flex", alignItems: "center", height: "100%" }}
             >
-              <Badge size="xl" radius="sm" color="indigo">Algorytm MRP dla produkcji łóżek</Badge>
+              <Badge size="xl" radius="sm" color="indigo">
+                Algorytm MRP dla produkcji łóżek
+              </Badge>
             </div>
           </Header>
         }
