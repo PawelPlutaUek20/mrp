@@ -104,7 +104,7 @@ const App = () => {
       setRama(
         mrpAlgorithm(ghp, RamaPlanowanePrzyjecia, ramaVariables, ghpVariables)
       ),
-    [ramaVariables, ghpVariables, ghp]
+    [ramaVariables, ghpVariables, ghp, RamaPlanowanePrzyjecia]
   );
 
   useEffect(
@@ -117,7 +117,7 @@ const App = () => {
     setNogi(
       mrpAlgorithm(newGhp, NogiPlanowanePrzyjecia, NogiVariables, ghpVariables)
     );
-  }, [NogiVariables, ghpVariables, ghp]);
+  }, [NogiVariables, ghpVariables, ghp, NogiPlanowanePrzyjecia]);
 
   useEffect(() => {
     const fakeGHP = Array.from(Array(1), () => new Array(10).fill(undefined));
@@ -130,7 +130,13 @@ const App = () => {
         ghpVariables
       )
     );
-  }, [StelazVariables, ramaVariables, rama]);
+  }, [
+    StelazVariables,
+    ramaVariables,
+    rama,
+    StelazPlanowanePrzyjecia,
+    ghpVariables,
+  ]);
 
   useEffect(() => {
     const fakeGHP = Array.from(Array(1), () => new Array(10).fill(undefined));
@@ -143,7 +149,13 @@ const App = () => {
         ghpVariables
       )
     );
-  }, [ZaglowekVariables, ramaVariables, rama]);
+  }, [
+    ZaglowekVariables,
+    ramaVariables,
+    rama,
+    ZaglowekPlanowanePrzyjecia,
+    ghpVariables,
+  ]);
 
   const updateStelaz = useCallback(
     (value: number, index: number) =>
@@ -159,7 +171,13 @@ const App = () => {
         );
         return tempGHP;
       }),
-    [setStelaz, setStelazPlanowanePrzyjecia]
+    [
+      setStelaz,
+      setStelazPlanowanePrzyjecia,
+      StelazVariables,
+      ghpVariables,
+      rama,
+    ]
   );
 
   const updateZaglowek = useCallback(
@@ -176,7 +194,13 @@ const App = () => {
         );
         return tempGHP;
       }),
-    [setZaglowek, setZaglowekPlanowanePrzyjecia]
+    [
+      setZaglowek,
+      setZaglowekPlanowanePrzyjecia,
+      ghpVariables,
+      ZaglowekVariables,
+      rama,
+    ]
   );
 
   const updateNogi = useCallback(
@@ -196,7 +220,14 @@ const App = () => {
 
         return tempGHP;
       }),
-    [setNogi, setNogiPlanowanePrzyjecia, setGhpVariables]
+    [
+      setNogi,
+      setNogiPlanowanePrzyjecia,
+      NogiPlanowanePrzyjecia,
+      ghp,
+      ghpVariables,
+      NogiVariables,
+    ]
   );
 
   const updateRama = useCallback(
@@ -211,7 +242,7 @@ const App = () => {
         return tempGHP;
       });
     },
-    [setRama, setRamaPlanowanePrzyjecia, setGhpVariables]
+    [setRama, setRamaPlanowanePrzyjecia, ghp, ghpVariables, ramaVariables]
   );
 
   const updateGhp = useCallback(
@@ -222,7 +253,7 @@ const App = () => {
         return ghpAlgorithm(tempGHP, ghpVariables);
       });
     },
-    [setGhp]
+    [setGhp, ghpVariables]
   );
 
   return (
