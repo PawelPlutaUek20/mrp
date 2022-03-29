@@ -16,11 +16,11 @@ type Props = {
 
 const mrpRows = [
   "Całkowite zapotrzebowanie",
-  "Planowanie przyjecia",
+  "Planowanie przyjęcia",
   "Przewidywane na stanie",
-  "Zapotrzeboawnie netto",
-  "Planowanie zamowienia",
-  "Planowane przyjecie zamowien",
+  "Zapotrzebowanie netto",
+  "Planowanie zamówienia",
+  "Planowane przyjecie zamówien",
 ];
 
 export const MrpTable: React.FC<Props> = React.memo(
@@ -34,7 +34,10 @@ export const MrpTable: React.FC<Props> = React.memo(
     return (
       <>
         <div style={{ display: "flex", minWidth: 1100 }}>
-          <Table my="md" style={{ maxWidth: "20em" }}>
+          <Table sx={(theme) => ({"& tbody>tr>td": {
+            borderRight: `1px solid ${theme.colorScheme === 'dark'
+            ?theme.colors.dark[4]:theme.colors.gray[3]}`
+          }})} my="md" style={{ minWidth: "20em", maxWidth:"28em" }}>
             <tbody>
               <tr>
                 <td>
@@ -66,13 +69,16 @@ export const MrpTable: React.FC<Props> = React.memo(
               ))}
             </tbody>
           </Table>
-          <Table my="md">
+          <Table sx={(theme) => ({"&  thead>tr>th , tbody>tr>td": {
+            borderRight: `1px solid ${theme.colorScheme === 'dark'
+            ?theme.colors.dark[4]:theme.colors.gray[3]}`
+          }})} my="md">
             <thead>
               <tr>
                 {inputRow.slice(ghpVariables.czasRealizacji).map((v, i) => (
                   <th
                     key={i}
-                    style={{ textAlign: "center", fontWeight: "normal" }}
+                    style={{ textAlign: "center", fontWeight: "normal"}}
                   >
                     <TextInput
                       size="lg"
@@ -83,7 +89,6 @@ export const MrpTable: React.FC<Props> = React.memo(
                         input: {
                           textAlign: "center",
                           color: theme.colors.indigo,
-                          backgroundColor: theme.colors.indigo[0],
                           borderRadius: "4px",
                           fontWeight: "bold",
                         },
