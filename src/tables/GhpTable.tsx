@@ -1,9 +1,9 @@
 import React from "react";
 
-import { NumberInput, Table, TextInput } from "@mantine/core";
+import { NumberInput, Table, TextInput, ThemeIcon } from "@mantine/core";
 import { Ghp } from "../utils";
 
-const ghpRows = ["Przewidywany popyt", "Produkcja", "Dostepne"];
+const ghpRows = ["Przewidywany popyt", "Produkcja", "Dostępne"];
 
 type Props = {
   table: any[][];
@@ -19,7 +19,10 @@ export const GhpTable: React.FC<Props> = React.memo(
     return (
       <>
         <div style={{ display: "flex", minWidth: 1100 }}>
-          <Table my="md" style={{ maxWidth: "20em" }}>
+          <Table sx={(theme) => ({"& tbody>tr>td": {
+            borderRight: `1px solid ${theme.colorScheme === 'dark'
+            ?theme.colors.dark[4]:theme.colors.gray[3]}`
+          }})} my="md" style={{ maxWidth: "20em" }}>
             <tbody>
               <tr>
                 <td>
@@ -36,7 +39,7 @@ export const GhpTable: React.FC<Props> = React.memo(
               </tr>
               {ghpRows.map((row, i) => (
                 <tr key={i}>
-                  <td>
+                  <td >
                     <TextInput
                       size="lg"
                       readOnly
@@ -51,7 +54,10 @@ export const GhpTable: React.FC<Props> = React.memo(
               ))}
             </tbody>
           </Table>
-          <Table my="md">
+          <Table sx={(theme) => ({"&  thead>tr>th , tbody>tr>td": {
+            borderRight: `1px solid ${theme.colorScheme === 'dark'
+            ?theme.colors.dark[4]:theme.colors.gray[3]}`
+          }})} my="md">
             <thead>
               <tr>
                 {Array(10)
@@ -67,7 +73,7 @@ export const GhpTable: React.FC<Props> = React.memo(
                           input: {
                             textAlign: "center",
                             color: theme.colors.indigo,
-                            backgroundColor: theme.colors.indigo[0],
+                            // backgroundColor: theme.colors.dark[7],
                             borderRadius: "4px",
                             fontWeight: "bold",
                           },
