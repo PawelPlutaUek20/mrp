@@ -110,11 +110,13 @@ export const MrpTable: React.FC<Props> = React.memo(
                             readOnly
                             variant="unstyled"
                             value={col}
-                            styles={{
+                            styles={(theme) => ({
                               input: {
                                 textAlign: "center",
+                                backgroundColor: `${col < 0 ? theme.colors.red[8]: ""}`,
+                                borderRadius: `10px`
                               },
-                            }}
+                            })}
                           />
                         </td>
                       ) : (
