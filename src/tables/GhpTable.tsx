@@ -1,6 +1,6 @@
 import React from "react";
 
-import { NumberInput, Table, TextInput, ThemeIcon } from "@mantine/core";
+import { NumberInput, Table, TextInput } from "@mantine/core";
 import { Ghp } from "../utils";
 
 const ghpRows = ["Przewidywany popyt", "Produkcja", "Dostępne"];
@@ -73,7 +73,6 @@ export const GhpTable: React.FC<Props> = React.memo(
                           input: {
                             textAlign: "center",
                             color: theme.colors.indigo,
-                            // backgroundColor: theme.colors.dark[7],
                             borderRadius: "4px",
                             fontWeight: "bold",
                           },

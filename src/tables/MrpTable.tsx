@@ -89,7 +89,6 @@ export const MrpTable: React.FC<Props> = React.memo(
                         input: {
                           textAlign: "center",
                           color: theme.colors.indigo,
-                          // backgroundColor: theme.colors.indigo[0],
                           borderRadius: "4px",
                           fontWeight: "bold",
                         },
