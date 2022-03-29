@@ -19,10 +19,19 @@ export const GhpTable: React.FC<Props> = React.memo(
     return (
       <>
         <div style={{ display: "flex", minWidth: 1100 }}>
-          <Table sx={(theme) => ({"& tbody>tr>td": {
-            borderRight: `1px solid ${theme.colorScheme === 'dark'
-            ?theme.colors.dark[4]:theme.colors.gray[3]}`
-          }})} my="md" style={{ maxWidth: "20em" }}>
+          <Table
+            my="md"
+            sx={(theme) => ({
+              width: "24em",
+              "& tbody tr td": {
+                borderRight: `1px solid ${
+                  theme.colorScheme === "dark"
+                    ? theme.colors.dark[4]
+                    : theme.colors.gray[3]
+                }`,
+              },
+            })}
+          >
             <tbody>
               <tr>
                 <td>
@@ -39,7 +48,7 @@ export const GhpTable: React.FC<Props> = React.memo(
               </tr>
               {ghpRows.map((row, i) => (
                 <tr key={i}>
-                  <td >
+                  <td>
                     <TextInput
                       size="lg"
                       readOnly
@@ -54,10 +63,18 @@ export const GhpTable: React.FC<Props> = React.memo(
               ))}
             </tbody>
           </Table>
-          <Table sx={(theme) => ({"&  thead>tr>th , tbody>tr>td": {
-            borderRight: `1px solid ${theme.colorScheme === 'dark'
-            ?theme.colors.dark[4]:theme.colors.gray[3]}`
-          }})} my="md">
+          <Table
+            my="md"
+            sx={(theme) => ({
+              "& thead tr th, tbody tr td": {
+                borderRight: `1px solid ${
+                  theme.colorScheme === "dark"
+                    ? theme.colors.dark[4]
+                    : theme.colors.gray[3]
+                }`,
+              },
+            })}
+          >
             <thead>
               <tr>
                 {Array(10)

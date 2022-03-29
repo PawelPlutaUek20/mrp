@@ -34,10 +34,19 @@ export const MrpTable: React.FC<Props> = React.memo(
     return (
       <>
         <div style={{ display: "flex", minWidth: 1100 }}>
-          <Table sx={(theme) => ({"& tbody>tr>td": {
-            borderRight: `1px solid ${theme.colorScheme === 'dark'
-            ?theme.colors.dark[4]:theme.colors.gray[3]}`
-          }})} my="md" style={{ minWidth: "20em", maxWidth:"28em" }}>
+          <Table
+            my="md"
+            sx={(theme) => ({
+              width: "24em",
+              "& tbody tr td": {
+                borderRight: `1px solid ${
+                  theme.colorScheme === "dark"
+                    ? theme.colors.dark[4]
+                    : theme.colors.gray[3]
+                }`,
+              },
+            })}
+          >
             <tbody>
               <tr>
                 <td>
@@ -69,16 +78,24 @@ export const MrpTable: React.FC<Props> = React.memo(
               ))}
             </tbody>
           </Table>
-          <Table sx={(theme) => ({"&  thead>tr>th , tbody>tr>td": {
-            borderRight: `1px solid ${theme.colorScheme === 'dark'
-            ?theme.colors.dark[4]:theme.colors.gray[3]}`
-          }})} my="md">
+          <Table
+            my="md"
+            sx={(theme) => ({
+              "& thead tr th, tbody tr td": {
+                borderRight: `1px solid ${
+                  theme.colorScheme === "dark"
+                    ? theme.colors.dark[4]
+                    : theme.colors.gray[3]
+                }`,
+              },
+            })}
+          >
             <thead>
               <tr>
                 {inputRow.slice(ghpVariables.czasRealizacji).map((v, i) => (
                   <th
                     key={i}
-                    style={{ textAlign: "center", fontWeight: "normal"}}
+                    style={{ textAlign: "center", fontWeight: "normal" }}
                   >
                     <TextInput
                       size="lg"
